@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+npm-debug.log*
+# Student records and local runtime data must not be committed.
+data/

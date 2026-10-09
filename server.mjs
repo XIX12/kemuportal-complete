@@ -7,10 +7,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(root, 'public');
 const distDir = path.join(root, 'dist');
-// Prefer DATA_DIR (Render persistent disk) so students survive restarts
-const dataDir = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(root, 'data');
+// Set DATA_DIR=/var/data on Render and attach a persistent disk at /var/data.
+// Local development keeps using ./data by default.
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
 const dbFile = path.join(dataDir, 'kemu-db.json');
 const sourceDir = await fs.access(distDir).then(() => distDir).catch(() => publicDir);
 const port = Number(process.env.PORT || 3000);
@@ -78,281 +77,119 @@ function normalizeEmail(value) {
 const CURRICULUM = {
   "Bachelor of Science in Computer Information Systems": {
     "1": [
-      [
-        "CISY 101",
-        "Introduction to Computer Systems",
-        3
-      ],
-      [
-        "CISY 110",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ],
-      [
-        "MATH 110",
-        "Linear Algebra I",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ]
+      ["THEO 111", "Christian Beliefs", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["CISY 101", "Introduction to Computer Systems", 3],
+      ["CISY 110", "Introduction to Programming", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["MATH 110", "Linear Algebra I", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["CISY 104", "Analog Electronics", 3],
+      ["CISY 111", "Structured Programming", 3],
+      ["CISY 131", "Introduction to Computer Networks", 3],
+      ["MATH 103", "Calculus I", 3],
+      ["MATH 132", "Probability and Statistics I", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "CISY 104",
-        "Analog Electronics",
-        3
-      ],
-      [
-        "CISY 111",
-        "Structured Programming",
-        3
-      ],
-      [
-        "CISY 131",
-        "Introduction to Computer Networks",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ],
-      [
-        "MATH 132",
-        "Probability and Statistics I",
-        3
-      ]
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["CISY 210", "Object Oriented Programming", 3],
+      ["CISY 221", "Database Systems", 3],
+      ["CISY 222", "System Analysis and Design", 3],
+      ["CISY 231", "Telecommunication Networks I", 3],
+      ["MATH 104", "Calculus II", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["CISY 201", "Computer Organization and Architecture", 3],
+      ["CISY 212", "Data Structures and Algorithms", 3],
+      ["MATH 211", "Discrete Structures", 3],
+      ["MATH 230", "Probability and Statistics II", 3],
+      ["PHYS 310", "Electrical Circuits", 3]
     ],
     "3": [
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ],
-      [
-        "CISY 210",
-        "Object Oriented Programming",
-        3
-      ],
-      [
-        "CISY 221",
-        "Database Systems",
-        3
-      ],
-      [
-        "CISY 222",
-        "System Analysis and Design",
-        3
-      ],
-      [
-        "CISY 231",
-        "Telecommunication Networks I",
-        3
-      ],
-      [
-        "MATH 104",
-        "Calculus II",
-        3
-      ]
+      ["BUSS 221", "Entrepreneurship", 3],
+      ["CISY 303", "Computer Hardware and Maintenance", 3],
+      ["CISY 204", "Digital Electronics", 3],
+      ["CISY 300", "Computer Operating Systems I", 3],
+      ["CISY 302", "Research Methodology", 3],
+      ["CISY 310", "Advanced Programming", 3],
+      ["BBIT 314", "Human Computer Interaction", 3],
+      ["CISY 311", "Internet Applications and Programming", 3],
+      ["CISY 321", "Software Engineering Principles", 3],
+      ["MATH 330", "Operations Research for Computer Scientists", 3],
+      ["CISY 331", "Network Administration I", 3],
+      ["CISY 421", "Management Information Systems", 3],
+      ["CISY 422", "Introduction to Artificial Intelligence", 3],
+      ["CISY 431", "Information Systems Security", 3],
+      ["CISY 404", "ICT Project Management", 3],
+      ["CISY 403", "Simulation and Modeling", 3],
+      ["CISY 432", "Distributed Systems", 3],
+      ["BUSS 420", "Strategic Management", 3]
     ]
   },
   "Diploma in Computer Information Systems": {
     "1": [
-      [
-        "DCIS 101",
-        "Introduction to Computer Systems",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ],
-      [
-        "DCIS 120",
-        "Introduction to Internet and Web Design",
-        3
-      ],
-      [
-        "BUSS 025",
-        "Business Communication",
-        3
-      ],
-      [
-        "DCIS 102",
-        "Basic Electronics",
-        3
-      ],
-      [
-        "DCIS 107",
-        "Office Applications",
-        3
-      ]
+      ["DCIS 101", "Introduction to Computer Systems", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["DCIS 120", "Introduction to Internet and Web Design", 3],
+      ["BUSS 025", "Business Communication", 3],
+      ["DCIS 102", "Basic Electronics", 3],
+      ["DCIS 107", "Office Applications", 3],
+      ["DCIS 103", "Computer Hardware and Maintenance", 3],
+      ["DCIS 104", "System Analysis and Design", 3],
+      ["DCIS 105", "Computer Organization and Architecture", 3],
+      ["DCIS 106", "Database Design and Implementation", 3],
+      ["DCIS 110", "Introduction to Programming", 3],
+      ["DCIS 121", "Computer Networks", 3]
     ],
     "2": [
-      [
-        "DCIS 103",
-        "Computer Hardware and Maintenance",
-        3
-      ],
-      [
-        "DCIS 104",
-        "System Analysis and Design",
-        3
-      ],
-      [
-        "DCIS 105",
-        "Computer Organization and Architecture",
-        3
-      ],
-      [
-        "DCIS 106",
-        "Database Design and Implementation",
-        3
-      ],
-      [
-        "DCIS 110",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "DCIS 121",
-        "Computer Networks",
-        3
-      ]
+      ["DCIS 201", "Computer Operating Systems", 3],
+      ["DCIS 211", "Event Driven Programming", 3],
+      ["DCIS 202", "Statistical Data Analysis", 3],
+      ["DCIS 220", "Network Design and Configuration", 3],
+      ["DCIS 221", "Advanced Web Design", 3],
+      ["DCIS 203", "I.T. Project Management", 3],
+      ["DCIS 222", "Network Administration and Management", 3],
+      ["DCIS 204", "Information System Management", 3],
+      ["ENTR 032", "Entrepreneurship", 3],
+      ["DCIS 205", "I.T User Support", 3],
+      ["DCIS 206", "IS Project", 3],
+      ["DCIS 207", "Emerging technologies in ICT", 3]
     ],
     "3": [
-      [
-        "DCIS 201",
-        "Computer Operating Systems",
-        3
-      ],
-      [
-        "DCIS 211",
-        "Event Driven Programming",
-        3
-      ],
-      [
-        "DCIS 202",
-        "Statistical Data Analysis",
-        3
-      ],
-      [
-        "DCIS 220",
-        "Network Design and Configuration",
-        3
-      ],
-      [
-        "DCIS 221",
-        "Advanced Web Design",
-        3
-      ],
-      [
-        "DCIS 203",
-        "I.T. Project Management",
-        3
-      ]
+      ["DCIS 300", "Industrial Attachment", 3]
     ]
   },
   "Bachelor of Science in Health Systems Management": {
     "1": [
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ],
-      [
-        "SOST 201",
-        "Science, Society, & Ethics",
-        3
-      ],
-      [
-        "COMP 100",
-        "Computer Science",
-        3
-      ],
-      [
-        "HSMU 114",
-        "Scientific Techniques for Health Systems Managers",
-        3
-      ],
-      [
-        "HSMU 116",
-        "Foundations of Health Systems Management",
-        3
-      ]
+      ["THEO 111", "Christian Beliefs", 3],
+      ["SOST 201", "Science, Society, & Ethics", 3],
+      ["COMP 100", "Computer Science", 3],
+      ["HSMU 114", "Scientific Techniques for Health Systems Managers", 3],
+      ["HSMU 116", "Foundations of Health Systems Management", 3],
+      ["HSMU 125", "Management for Health System Managers", 3],
+      ["HSMU 127", "Managerial Psychology", 3],
+      ["HSMU 128", "Leadership for Health Systems", 3],
+      ["HSMU 129", "Management Communication in Health Systems", 3],
+      ["MATH 130", "Basic Statistics", 3],
+      ["HSMU 136", "Health Policy Development & Planning", 3],
+      ["HSMU 137", "Epidemiology & Demography for Health Systems Management", 3]
     ],
     "2": [
-      [
-        "HSMU 125",
-        "Management for Health System Managers",
-        3
-      ],
-      [
-        "HSMU 127",
-        "Managerial Psychology",
-        3
-      ],
-      [
-        "HSMU 128",
-        "Leadership for Health Systems",
-        3
-      ],
-      [
-        "HSMU 129",
-        "Management Communication in Health Systems",
-        3
-      ],
-      [
-        "Math 130",
-        "Basic Statistics",
-        3
-      ]
+      ["HSMU 138", "Health Management Information Systems", 3],
+      ["HSMU 139", "Fundamentals of Health Economics", 3],
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["HSMU 211", "Fundamentals of Healthcare Accounting", 3],
+      ["HSMU 212", "Health Care Financing", 3],
+      ["HSMU 213", "Health Risk & Insurance Management", 3],
+      ["HSMU 214", "Information Technology Resource Management for Health", 3],
+      ["HSMU 215", "Healthcare Entrepreneurship", 3],
+      ["HSMU 221", "Managing Community Health Services", 3],
+      ["HSMU 222", "Managing Healthcare Organizations", 3],
+      ["HSMU 223", "Healthcare Infrastructure Management", 3],
+      ["HSMU 224", "Health Workforce Management & Development", 3]
     ],
     "3": [
-      [
-        "HSMU 136",
-        "Health Policy Development & Planning",
-        3
-      ],
-      [
-        "HSMU 137",
-        "Epidemiology & Demography for Health Systems Management",
-        3
-      ],
-      [
-        "HSMU 138",
-        "Health Management Information Systems",
-        3
-      ],
-      [
-        "HSMU 139",
-        "Fundamentals of Health Economics",
-        3
-      ],
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ]
+      ["HSMU 225", "Health Care Law & Ethics", 3],
+      ["HSMU 231", "Management of District Health Services", 3]
     ]
   },
   "Bachelor of Arts in International Relations": {
@@ -847,394 +684,179 @@ const CURRICULUM = {
   },
   "Bachelor of Business Information Technology": {
     "1": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "BBIT 111",
-        "Introduction to Business Information Systems",
-        3
-      ],
-      [
-        "ECON 101",
-        "Principles of Microeconomics",
-        3
-      ],
-      [
-        "BUSS 100",
-        "Principles of Management",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ],
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ]
+      ["COMM 111", "Communication Skills", 3],
+      ["BBIT 111", "Introduction to Business Information Systems", 3],
+      ["ECON 101", "Principles of Microeconomics", 3],
+      ["BUSS 100", "Principles of Management", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["THEO 111", "Christian Beliefs", 3],
+      ["BBIT 121", "Introduction to Programming", 3],
+      ["BBIT 112", "Computer Organization and Architecture", 3],
+      ["MATH 132", "Probability and Statistics I", 3],
+      ["ACCT 112", "Principles of Accounting I", 3],
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["ECON 102", "Principles of Macroeconomics", 3]
     ],
     "2": [
-      [
-        "BBIT 121",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "BBIT 112",
-        "Computer Organization and Architecture",
-        3
-      ],
-      [
-        "MATH 132",
-        "Probability and Statistics I",
-        3
-      ],
-      [
-        "ACCT 112",
-        "Principles of Accounting I",
-        3
-      ],
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ],
-      [
-        "ECON 102",
-        "Principles of Macroeconomics",
-        3
-      ]
+      ["MATH 110", "Linear Algebra I", 3],
+      ["BBIT 222", "Structured Programming", 3],
+      ["BBIT 231", "Systems Analysis and Design", 3],
+      ["BBIT 232", "Database Systems", 3],
+      ["BBIT 213", "Computer Operating Systems I", 3],
+      ["BBIT 241", "Introduction to Computer Networks", 3],
+      ["BBIT 223", "Object Oriented Programming", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["BBIT 242", "Telecommunication Networks", 3],
+      ["ACCT 219", "Cost Accounting", 3],
+      ["BUSS 326", "Organizational Behaviour", 3],
+      ["MKTG 218", "Principles of Marketing", 3]
     ],
     "3": [
-      [
-        "MATH 110",
-        "Linear Algebra I",
-        3
-      ],
-      [
-        "BBIT 222",
-        "Structured Programming",
-        3
-      ],
-      [
-        "BBIT 231",
-        "Systems Analysis and Design",
-        3
-      ],
-      [
-        "BBIT 232",
-        "Database Systems",
-        3
-      ],
-      [
-        "BBIT 213",
-        "Computer Operating Systems I",
-        3
-      ],
-      [
-        "BBIT 241",
-        "Introduction to Computer Networks",
-        3
-      ]
+      ["BUSS 212", "Business Law I", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["MATH 330", "Operations Research for Business", 3],
+      ["BBIT 333", "Introduction to Artificial Intelligence", 3],
+      ["BBIT 324", "Data Structures and Algorithms", 3],
+      ["BBIT 334", "Software Engineering Principles", 3],
+      ["BBIT 314", "Human Computer Interaction", 3],
+      ["BBIT 315", "Project Management in Business", 3],
+      ["BBIT 335", "Object-Oriented Analysis and Design", 3],
+      ["BBIT 316", "Research Methodology", 3],
+      ["BBIT 325", "Application Programming for the Internet", 3],
+      ["BBIT 436", "E-Commerce", 3],
+      ["BBIT 417", "Computer Based Business Modeling", 3],
+      ["BBIT 443", "Information Systems Security and Audit", 3],
+      ["BBIT 437", "Accounting Information Systems", 3],
+      ["BBIT 438", "Management Information Systems", 3],
+      ["BUSS 420", "Strategic Management", 3],
+      ["BUSS 221", "Fundamentals of Entrepreneurship", 3]
     ]
   },
   "Bachelor of Science in Computer Science": {
     "1": [
-      [
-        "COSC 101",
-        "Introduction to Computer Science",
-        3
-      ],
-      [
-        "COSC 110",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ],
-      [
-        "COSC 104",
-        "Fundamentals of Internet and Web Design",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ]
+      ["COSC 101", "Introduction to Computer Science", 3],
+      ["COSC 110", "Introduction to Programming", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["COSC 104", "Fundamentals of Internet and Web Design", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["THEO 111", "Christian Beliefs", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["BUSS 114", "Entrepreneurship", 3],
+      ["COSC 111", "Structured Programming", 3],
+      ["COSC 131", "Introduction to Computer Networks", 3],
+      ["MATH 103", "Calculus I", 3],
+      ["MATH 132", "Probability and Statistics I", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "BUSS 114",
-        "Entrepreneurship",
-        3
-      ],
-      [
-        "COSC 111",
-        "Structured Programming",
-        3
-      ],
-      [
-        "COSC 131",
-        "Introduction to Computer Networks",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ],
-      [
-        "MATH 132",
-        "Probability and Statistics I",
-        3
-      ]
+      ["COSC 201", "Computer Systems and Architecture", 3],
+      ["COSC 210", "Object Oriented Programming", 3],
+      ["COSC 212", "Data Structures and Algorithms", 3],
+      ["COSC 221", "Database Systems", 3],
+      ["COSC 222", "Systems Analysis and Design", 3],
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["COSC 231", "Telecommunication Networks", 3],
+      ["COSC 300", "Computer Operating Systems", 3],
+      ["COSC 302", "Research Methodology", 3],
+      ["COSC 303", "Computer Hardware and Maintenance", 3],
+      ["COSC 310", "Advanced Programming", 3],
+      ["COSC 311", "Advanced Web Development", 3]
     ],
     "3": [
-      [
-        "COSC 201",
-        "Computer Systems and Architecture",
-        3
-      ],
-      [
-        "COSC 210",
-        "Object Oriented Programming",
-        3
-      ],
-      [
-        "COSC 212",
-        "Data Structures and Algorithms",
-        3
-      ],
-      [
-        "COSC 221",
-        "Database Systems",
-        3
-      ],
-      [
-        "COSC 222",
-        "Systems Analysis and Design",
-        3
-      ],
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ]
+      ["ENVI 201", "Environmental Science", 3],
+      ["COSC 314", "Human Computer Interaction", 3],
+      ["COSC 321", "Software Engineering Principles", 3],
+      ["COSC 403", "Simulation and Modeling", 3],
+      ["COSC 404", "Project Management", 3],
+      ["COSC 432", "Distributed Systems", 3],
+      ["COSC 330", "Introduction to Cybersecurity", 3],
+      ["COSC 334", "Cryptography", 3],
+      ["COSC 335", "Network Security", 3],
+      ["COSC 313", "Ethical Hacking", 3],
+      ["COSC 422", "Introduction to AI", 3],
+      ["COSC 431", "Information Systems Security", 3],
+      ["COSC 400", "Industrial Attachment", 3],
+      ["COSC 401", "Research Project", 6]
     ]
   },
   "Bachelor of Science in Mathematics and Computer Science": {
     "1": [
-      [
-        "COMP 101",
-        "Introduction to Computer Science",
-        3
-      ],
-      [
-        "COMP 110",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundations of Mathematics",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ]
+      ["COMP 101", "Introduction to Computer Science", 3],
+      ["COMP 110", "Introduction to Programming", 3],
+      ["MATH 102", "Foundations of Mathematics", 3],
+      ["MATH 103", "Calculus I", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["THEO 111", "Christian Beliefs", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["COMP 104", "Analogue Electronics", 3],
+      ["COMP 111", "Structured Programming", 3],
+      ["MATH 104", "Calculus II", 3],
+      ["MATH 110", "Linear Algebra I", 3],
+      ["MATH 132", "Probability and Statistics I", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "COMP 104",
-        "Analogue Electronics",
-        3
-      ],
-      [
-        "COMP 111",
-        "Structured Programming",
-        3
-      ],
-      [
-        "MATH 104",
-        "Calculus II",
-        3
-      ],
-      [
-        "MATH 110",
-        "Linear Algebra I",
-        3
-      ],
-      [
-        "MATH 132",
-        "Probability and Statistics I",
-        3
-      ]
+      ["COMP 131", "Introduction to Computer Networks", 3],
+      ["COMP 211", "Object Oriented Programming", 3],
+      ["COMP 231", "Telecommunication Networks", 3],
+      ["MATH 200", "Calculus III", 3],
+      ["MATH 210", "Linear Algebra II", 3],
+      ["MATH 230", "Probability and Statistics II", 3],
+      ["COMP 201", "Computer Organization and Architecture", 3],
+      ["COMP 210", "Data Structures", 3],
+      ["COMP 220", "System Analysis and Design", 3],
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["MATH 211", "Discrete Structures", 3],
+      ["MATH 220", "Ordinary Differential Equations I", 3]
     ],
     "3": [
-      [
-        "COMP 131",
-        "Introduction to Computer Networks",
-        3
-      ],
-      [
-        "COMP 211",
-        "Object Oriented Programming",
-        3
-      ],
-      [
-        "COMP 231",
-        "Telecommunication Networks",
-        3
-      ],
-      [
-        "MATH 200",
-        "Calculus III",
-        3
-      ],
-      [
-        "MATH 210",
-        "Linear Algebra II",
-        3
-      ],
-      [
-        "MATH 230",
-        "Probability and Statistics II",
-        3
-      ]
+      ["COMP 300", "Operating Systems", 3],
+      ["COMP 302", "Digital Electronics", 3],
+      ["COMP 340", "Database Management System", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["MATH 221", "Vector Analysis", 3],
+      ["MATH 310", "Real Analysis I", 3],
+      ["BUSS 114", "Fundamentals of Entrepreneurship", 3],
+      ["COMP 303", "Computer Hardware and Maintenance", 3],
+      ["COMP 304", "Research Methodology", 3],
+      ["MATH 320", "Numerical Analysis I", 3],
+      ["MATH 331", "Operation Research I", 3],
+      ["PHYS 310", "Electrical Circuits", 3],
+      ["COMP 400", "Internship", 3],
+      ["COMP 422", "Automata and Formal Language", 3],
+      ["MATH 410", "Complex Variable Theory I", 3],
+      ["MATH 412", "Algebraic Structures", 3]
     ]
   },
   "Diploma in Business Information Technology": {
     "1": [
-      [
-        "DBIT 120",
-        "Introduction to Computer Systems",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ],
-      [
-        "ACCT 010",
-        "Principles of Accounting 1",
-        3
-      ],
-      [
-        "BUSS 025",
-        "Business Communication",
-        3
-      ],
-      [
-        "DBIT 122",
-        "Introduction to Internet and Web Design",
-        3
-      ],
-      [
-        "DBIT 126",
-        "Office Applications",
-        3
-      ]
+      ["DBIT 120", "Introduction to Computer Systems", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["ACCT 010", "Principles of Accounting 1", 3],
+      ["BUSS 025", "Business Communication", 3],
+      ["DBIT 122", "Introduction to Internet and Web Design", 3],
+      ["DBIT 126", "Office Applications", 3],
+      ["MKTG 022", "Marketing Fundamentals", 3],
+      ["ECON 015", "Principles of Economics", 3],
+      ["DBIT 121", "Introduction to Programming", 3],
+      ["DBIT 123", "Computer Hardware and Maintenance", 3],
+      ["DBIT 124", "System Analysis and Design", 3],
+      ["DBIT 210", "Computer Organization and Architecture", 3]
     ],
     "2": [
-      [
-        "MKTG 022",
-        "Marketing Fundamentals",
-        3
-      ],
-      [
-        "ECON 015",
-        "Principles of Economics",
-        3
-      ],
-      [
-        "DBIT 121",
-        "Introduction to Programming",
-        3
-      ],
-      [
-        "DBIT 123",
-        "Computer Hardware and Maintenance",
-        3
-      ],
-      [
-        "DBIT 124",
-        "System Analysis and Design",
-        3
-      ],
-      [
-        "DBIT 210",
-        "Computer Organization and Architecture",
-        3
-      ]
+      ["DBIT 125", "Operating Systems", 3],
+      ["BUSS 012", "Principles of Management", 3],
+      ["DBIT 220", "Statistical Data Analysis", 3],
+      ["DBIT 221", "Database Management Systems", 3],
+      ["DBIT 222", "I.T. Project Management", 3],
+      ["DBIT 223", "Computer Networking", 3],
+      ["ENTR 032", "Entrepreneurship", 3],
+      ["BUSS 035", "Organization Behavior and Leadership", 3],
+      ["DBIT 224", "Information System Management", 3],
+      ["DBIT 225", "Event Driven Programming", 3],
+      ["DBIT 226", "Research Project", 3],
+      ["DBIT 227", "Emerging Technologies in ICT", 3]
     ],
     "3": [
-      [
-        "DBIT 125",
-        "Operating Systems",
-        3
-      ],
-      [
-        "BUSS 012",
-        "Principles of Management",
-        3
-      ],
-      [
-        "DBIT 220",
-        "Statistical Data Analysis",
-        3
-      ],
-      [
-        "DBIT 221",
-        "Database Management Systems",
-        3
-      ],
-      [
-        "DBIT 222",
-        "I.T. Project Management",
-        3
-      ],
-      [
-        "DBIT 223",
-        "Computer Networking",
-        3
-      ]
+      ["DBIT 300", "Industrial Attachment", 3]
     ]
   },
   "Bachelor of Science in Nursing": {
@@ -1729,101 +1351,32 @@ const CURRICULUM = {
   },
   "Diploma in Theology": {
     "1": [
-      [
-        "THEO 050",
-        "Ministerial Mentorship",
-        3
-      ],
-      [
-        "THEO 051",
-        "Introduction to Study of Theology",
-        3
-      ],
-      [
-        "THEO 052",
-        "Introduction to Christian Education",
-        3
-      ],
-      [
-        "THEO 053",
-        "Introduction to Study of Old Testament",
-        3
-      ],
-      [
-        "THEO 054",
-        "Introduction to Study of New Testament",
-        3
-      ],
-      [
-        "THEO 055",
-        "Early and Medieval Church History",
-        3
-      ]
+      ["THEO 050", "Ministerial Mentorship", 3],
+      ["THEO 051", "Introduction to Study of Theology", 3],
+      ["THEO 052", "Introduction to Christian Education", 3],
+      ["THEO 053", "Introduction to Study of Old Testament", 3],
+      ["THEO 054", "Introduction to Study of New Testament", 3],
+      ["THEO 055", "Early and Medieval Church History", 3],
+      ["THEO 056", "Reformation and Modern Church History", 3],
+      ["THEO 060", "Christian Doctrines", 3],
+      ["THEO 061", "Principles of Church Management", 3],
+      ["THEO 063", "Church Planting", 3],
+      ["THEO 068", "Principles of Worship", 3],
+      ["THEO 069", "Introduction to African Traditional Religion", 3]
     ],
     "2": [
-      [
-        "THEO 056",
-        "Reformation and Modern Church History",
-        3
-      ],
-      [
-        "THEO 060",
-        "Christian Doctrines",
-        3
-      ],
-      [
-        "THEO 061",
-        "Principles of Church Management",
-        3
-      ],
-      [
-        "THEO 063",
-        "Church Planting",
-        3
-      ],
-      [
-        "THEO 068",
-        "Principles of Worship",
-        3
-      ],
-      [
-        "THEO 069",
-        "Introduction to African Traditional Religion",
-        3
-      ]
+      ["THEO 070", "Introduction to Biblical Interpretation", 3],
+      ["THEO 071", "Pastoral Ministry", 3],
+      ["THEO 074", "Introduction to African Church History", 3],
+      ["THEO 076", "Introduction to Preaching", 3],
+      ["THEO 082", "Introduction to Old Testament Texts in English", 3],
+      ["THEO 083", "Introduction to New Testament Texts in English", 3],
+      ["THEO 085", "Introduction to Methodism", 3],
+      ["THEO 089", "Introduction to World Major Religions", 3],
+      ["THEO 091", "Introduction to Christian Ethics", 3],
+      ["THEO 099", "Circuit/Parish Attachment", 3]
     ],
-    "3": [
-      [
-        "THEO 070",
-        "Introduction to Biblical Interpretation",
-        3
-      ],
-      [
-        "THEO 071",
-        "Pastoral Ministry",
-        3
-      ],
-      [
-        "THEO 074",
-        "Introduction to African Church History",
-        3
-      ],
-      [
-        "THEO 076",
-        "Introduction to Preaching",
-        3
-      ],
-      [
-        "THEO 085",
-        "Introduction to Methodism",
-        3
-      ],
-      [
-        "THEO 091",
-        "Introduction to Christian Ethics",
-        3
-      ]
-    ]
+    "3": []
   },
   "Bachelor of Theology": {
     "1": [
@@ -1925,395 +1478,166 @@ const CURRICULUM = {
   },
   "Bachelor of Science in Artificial Intelligence and Robotics": {
     "1": [
-      [
-        "AIRS 101",
-        "Introduction to Computer Science",
-        3
-      ],
-      [
-        "AIRS 102",
-        "Introduction to Artificial Intelligence",
-        3
-      ],
-      [
-        "AIRS 103",
-        "Introduction to Programming in Python",
-        3
-      ],
-      [
-        "MATH 110",
-        "Linear Algebra I",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ]
+      ["THEO 111", "Christian Beliefs", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["AIRS 101", "Introduction to Computer Science", 3],
+      ["AIRS 102", "Introduction to Artificial Intelligence", 3],
+      ["AIRS 103", "Introduction to Programming in Python", 3],
+      ["MATH 110", "Linear Algebra I", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["ELEC 104", "Analog Electronics", 3],
+      ["AIRS 105", "Introduction to Robotics", 3],
+      ["AIRS 106", "Introduction to Ethics in AI", 3],
+      ["AIRS 210", "Object Oriented Programming", 3],
+      ["MATH 103", "Calculus I", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "ELEC 104",
-        "Analog Electronics",
-        3
-      ],
-      [
-        "AIRS 105",
-        "Introduction to Robotics",
-        3
-      ],
-      [
-        "AIRS 106",
-        "Introduction to Ethics in AI",
-        3
-      ],
-      [
-        "AIRS 210",
-        "Object Oriented Programming",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ]
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["BUSS 221", "Fundamentals of Entrepreneurship", 3],
+      ["AIRS 201", "Machine Learning I", 3],
+      ["AIRS 212", "Data Structures and Algorithms", 3],
+      ["ELEC 204", "Digital Electronics", 3],
+      ["MATH 104", "Calculus II", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["AIRS 202", "Natural Language Processing", 3],
+      ["AIRS 203", "Computer Networks for AI and Robotics", 3],
+      ["AIRS 205", "Problem Solving in AI and Robotics", 3],
+      ["AIRS 221", "Database Systems", 3],
+      ["MATH 132", "Probability and Statistics I", 3]
     ],
     "3": [
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ],
-      [
-        "BUSS 221",
-        "Fundamentals of Entrepreneurship",
-        3
-      ],
-      [
-        "AIRS 201",
-        "Machine Learning I",
-        3
-      ],
-      [
-        "AIRS 212",
-        "Data Structures and Algorithms",
-        3
-      ],
-      [
-        "ELEC 204",
-        "Digital Electronics",
-        3
-      ],
-      [
-        "MATH 104",
-        "Calculus II",
-        3
-      ]
+      ["AIRS 300", "Computer Operating Systems", 3],
+      ["AIRS 301", "Machine Learning II", 3],
+      ["AIRS 302", "Research Methodology", 3],
+      ["AIRS 303", "Computer Vision", 3],
+      ["AIRS 304", "Human – Robot Interaction", 3],
+      ["AIRS 305", "Control Systems Principles", 3],
+      ["AIRS 306", "Deep Learning Applications", 3],
+      ["AIRS 307", "Reinforcement Learning", 3],
+      ["AIRS 311", "Robotics Kinematics", 3],
+      ["AIRS 312", "Perception in Robots", 3],
+      ["AIRS 400", "Industrial Attachment", 3],
+      ["AIRS 401", "AI Research Project", 6]
     ]
   },
   "Bachelor of Science in Blockchain Technology": {
     "1": [
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "MATH 110",
-        "Linear Algebra I",
-        3
-      ],
-      [
-        "CSBT 101",
-        "Introduction to Computer Science",
-        3
-      ],
-      [
-        "CSBT 102",
-        "Introduction to Blockchain Technology",
-        3
-      ],
-      [
-        "CSBT 103",
-        "Introduction to Programming in Python",
-        3
-      ]
+      ["THEO 111", "Christian Beliefs", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["MATH 110", "Linear Algebra I", 3],
+      ["CSBT 101", "Introduction to Computer Science", 3],
+      ["CSBT 102", "Introduction to Blockchain Technology", 3],
+      ["CSBT 103", "Introduction to Programming in Python", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["MATH 103", "Calculus I", 3],
+      ["ECON 101", "Principles of Economics", 3],
+      ["CSBT 104", "Introduction to Cryptography", 3],
+      ["CSBT 105", "Introduction to Artificial Intelligence", 3],
+      ["CSBT 106", "Object Oriented Programming", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ],
-      [
-        "ECON 101",
-        "Principles of Economics",
-        3
-      ],
-      [
-        "CSBT 104",
-        "Introduction to Cryptography",
-        3
-      ],
-      [
-        "CSBT 105",
-        "Introduction to Artificial Intelligence",
-        3
-      ],
-      [
-        "CSBT 106",
-        "Object Oriented Programming",
-        3
-      ]
+      ["BUSS 100", "Principles and Practices of Management", 3],
+      ["MATH 132", "Probability and Statistics I", 3],
+      ["CSBT 201", "Computer Organization and Architecture", 3],
+      ["CSBT 202", "Computer Networks", 3],
+      ["CSBT 203", "Data Structures and Algorithms", 3],
+      ["CSBT 204", "Database Systems", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["MATH 211", "Discrete Structures", 3],
+      ["FINA 213", "Financial Accounting I", 3],
+      ["CSBT 205", "Operating Systems", 3],
+      ["CSBT 206", "Software Engineering", 3],
+      ["CSBT 207", "Introduction to Smart Contracts", 3]
     ],
     "3": [
-      [
-        "BUSS 100",
-        "Principles and Practices of Management",
-        3
-      ],
-      [
-        "MATH 132",
-        "Probability and Statistics I",
-        3
-      ],
-      [
-        "CSBT 201",
-        "Computer Organization and Architecture",
-        3
-      ],
-      [
-        "CSBT 202",
-        "Computer Networks",
-        3
-      ],
-      [
-        "CSBT 203",
-        "Data Structures and Algorithms",
-        3
-      ],
-      [
-        "CSBT 204",
-        "Database Systems",
-        3
-      ]
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["CSBT 300", "Corporate Finance", 3],
+      ["CSBT 301", "Legal Aspects of Blockchain", 3],
+      ["CSBT 302", "Cybersecurity Principles", 3],
+      ["CSBT 303", "Project Management", 3],
+      ["CSBT 304", "Ethical Hacking", 3],
+      ["CSBT 305", "Advanced Blockchain Development", 3],
+      ["CSBT 306", "Decentralized Applications", 3],
+      ["CSBT 307", "Decentralized Finance", 3],
+      ["CSBT 308", "Consensus Algorithms", 3],
+      ["CSBT 309", "Blockchain Security", 3],
+      ["CSBT 400", "Industrial Attachment", 3],
+      ["CSBT 401", "Blockchain Research Project", 6]
     ]
   },
   "Bachelor of Science in Software Engineering and Mobile Applications": {
     "1": [
-      [
-        "THEO 111",
-        "Christian Beliefs",
-        3
-      ],
-      [
-        "SOST 131",
-        "Introduction to Sociology",
-        3
-      ],
-      [
-        "SEMA 101",
-        "Introduction to Computer Systems",
-        3
-      ],
-      [
-        "SEMA 102",
-        "Fundamentals of Internet and Web Design",
-        3
-      ],
-      [
-        "SEMA 103",
-        "Introduction to Python Programming",
-        3
-      ],
-      [
-        "MATH 102",
-        "Foundation of Mathematics",
-        3
-      ]
+      ["THEO 111", "Christian Beliefs", 3],
+      ["SOST 131", "Introduction to Sociology", 3],
+      ["SEMA 101", "Introduction to Computer Systems", 3],
+      ["SEMA 102", "Fundamentals of Internet and Web Design", 3],
+      ["SEMA 103", "Introduction to Python Programming", 3],
+      ["MATH 102", "Foundation of Mathematics", 3],
+      ["COMM 111", "Communication Skills", 3],
+      ["SEMA 105", "Fundamentals of Software Engineering", 3],
+      ["SEMA 116", "Fundamentals of Mobile Development", 3],
+      ["SEMA 111", "Structured Programming in Python", 3],
+      ["MATH 103", "Calculus I", 3],
+      ["BUSS 114", "Entrepreneurship", 3]
     ],
     "2": [
-      [
-        "COMM 111",
-        "Communication Skills",
-        3
-      ],
-      [
-        "SEMA 105",
-        "Fundamentals of Software Engineering",
-        3
-      ],
-      [
-        "SEMA 116",
-        "Fundamentals of Mobile Development",
-        3
-      ],
-      [
-        "SEMA 111",
-        "Structured Programming in Python",
-        3
-      ],
-      [
-        "MATH 103",
-        "Calculus I",
-        3
-      ],
-      [
-        "BUSS 114",
-        "Entrepreneurship",
-        3
-      ]
+      ["HSCI 225", "HIV/AIDS", 3],
+      ["SEMA 223", "Mobile UI/UX Design basic Principles", 3],
+      ["SEMA 221", "Database Systems", 3],
+      ["SEMA 203", "Software Engineering Ethics", 3],
+      ["SEMA 204", "Mobile Application Design & Prototyping", 3],
+      ["MATH 104", "Calculus II", 3],
+      ["ENVI 201", "Environmental Science", 3],
+      ["MATH 211", "Discrete Structures", 3],
+      ["SEMA 210", "Mobile Application Architecture", 3],
+      ["SEMA 212", "Data Structures and Algorithms in Python", 3],
+      ["SEMA 205", "Cross platform Front End Mobile Application Development- React Native", 3],
+      ["SEMA 206", "Object-Oriented Programming in Java", 3]
     ],
     "3": [
-      [
-        "HSCI 225",
-        "HIV/AIDS",
-        3
-      ],
-      [
-        "SEMA 223",
-        "Mobile UI/UX Design basic Principles",
-        3
-      ],
-      [
-        "SEMA 221",
-        "Database Systems",
-        3
-      ],
-      [
-        "SEMA 203",
-        "Software Engineering Ethics",
-        3
-      ],
-      [
-        "SEMA 204",
-        "Mobile Application Design & Prototyping",
-        3
-      ],
-      [
-        "MATH 104",
-        "Calculus II",
-        3
-      ]
+      ["SEMA 306", "Mobile Application Security", 3],
+      ["SEMA 301", "Advanced Programming in Python", 3],
+      ["SEMA 310", "Mobile Application Testing and Debugging", 3],
+      ["SEMA 304", "Mobile Application Monetization", 3],
+      ["SEMA 300", "Operating Systems", 3],
+      ["SEMA 302", "Research Methodology", 3],
+      ["SEMA 303", "Mobile Application Deployment", 3],
+      ["SEMA 314", "Human-Computer Interaction", 3],
+      ["MATH 330", "Operation Research for Computer Science", 3],
+      ["SEMA 321", "Advanced Software Engineering", 3],
+      ["SEMA 311", "Advanced Web Development", 3],
+      ["SEMA 400", "Industrial Attachment", 3],
+      ["SEMA 401", "Research Project", 6]
     ]
   },
   "Diploma in Information Science": {
     "1": [
-      [
-        "DISC 112",
-        "Introduction to library and Information science",
-        3
-      ],
-      [
-        "DISC 113",
-        "Introduction to computers",
-        3
-      ],
-      [
-        "DISC 115",
-        "Introduction to database systems",
-        3
-      ],
-      [
-        "DISC 116",
-        "Introduction to multimedia information sources & services",
-        3
-      ],
-      [
-        "DISC 117",
-        "Introduction to Records and Archives",
-        3
-      ],
-      [
-        "DISC 119",
-        "Introduction to organization of knowledge",
-        3
-      ]
+      ["DISC 112", "Introduction to library and Information science", 3],
+      ["DISC 113", "Introduction to computers", 3],
+      ["DISC 115", "Introduction to database systems", 3],
+      ["DISC 116", "Introduction to multimedia information sources & services", 3],
+      ["DISC 117", "Introduction to Records and Archives", 3],
+      ["DISC 119", "Introduction to organization of knowledge", 3],
+      ["DISC 118", "Internet and information services", 3],
+      ["DISC 120", "Introduction to Management of Library and Information Centres", 3],
+      ["DISC 121", "Records Management", 3],
+      ["DISC 122", "Organization of knowledge: classification", 3],
+      ["DISC 123", "Organization of knowledge: cataloguing", 3],
+      ["DISC 124", "Information communication & mass media", 3]
     ],
     "2": [
-      [
-        "DISC 118",
-        "Internet and information services",
-        3
-      ],
-      [
-        "DISC 120",
-        "Introduction to Management of Library and Information Centres",
-        3
-      ],
-      [
-        "DISC 121",
-        "Records Management",
-        3
-      ],
-      [
-        "DISC 122",
-        "Organization of knowledge: classification",
-        3
-      ],
-      [
-        "DISC 123",
-        "Organization of knowledge: cataloguing",
-        3
-      ],
-      [
-        "DISC 124",
-        "Information communication & mass media",
-        3
-      ]
+      ["DISC 201", "User studies and information needs", 3],
+      ["DISC 202", "Reference and information services", 3],
+      ["DISC 204", "Conservation and Restoration of Information materials", 3],
+      ["DISC 206", "Automation of Libraries and Information Centres", 3],
+      ["DISC 205", "Research methods in information science", 3],
+      ["DISC 214", "Entrepreneurship", 3],
+      ["DISC 215", "Project", 6],
+      ["DISC 216", "Practicum", 6],
+      ["DISC 217", "Information Communication Technologies", 3],
+      ["DISC 219", "Archives management", 3]
     ],
-    "3": [
-      [
-        "DISC 201",
-        "User studies and information needs",
-        3
-      ],
-      [
-        "DISC 202",
-        "Reference and information services",
-        3
-      ],
-      [
-        "DISC 204",
-        "Conservation and Restoration of Information materials",
-        3
-      ],
-      [
-        "DISC 206",
-        "Automation of Libraries and Information Centres",
-        3
-      ],
-      [
-        "DISC 205",
-        "Research methods in information science",
-        3
-      ],
-      [
-        "DISC 214",
-        "Entrepreneurship",
-        3
-      ]
-    ]
+    "3": []
   },
   "Bachelor of Arts in Communication and Journalism": {
     "1": [
@@ -2515,32 +1839,186 @@ const CURRICULUM = {
 
 const PROGRAMME_LIST = Object.keys(CURRICULUM).sort();
 
-const CAMPUS_ADDRESSES = {
-  main: {
-    name: 'KENYA METHODIST UNIVERSITY',
-    lines: [
-      'P. O. BOX 267 - 60200 Meru - Kenya,',
-      'Tel: 254-061-313097, 254-064-3131279, 0724256162',
-      'Email: info@kemu.ac.ke, Website: www.kemu.ac.ke'
-    ]
-  },
-  nairobi: {
-    name: 'Nairobi Campus — KeMU Hub',
-    lines: ['P.O. Box 45240-00100, Nairobi, Kenya', 'Tel: 020-2247987/2248172, 0725 751 878', 'Email: nairobicampus@kemu.ac.ke']
-  },
-  mombasa: {
-    name: 'Mombasa Campus',
-    lines: ['P.O. Box 89983-80100, Mombasa, Kenya', 'Tel: 041-2495945/8, 0715 120 282']
-  },
-  nakuru: {
-    name: 'Nakuru Campus — Mache Plaza',
-    lines: ['P.O. Box 3654-20100, Nakuru, Kenya', 'Tel: 051-2214456']
-  },
-  nyeri: {
-    name: 'Nyeri Campus — Rware Building',
-    lines: ['P.O. Box 2285-10140, Nyeri, Kenya', 'Tel: 061-2032904, 0700 739 988']
+// Shared electives / general education pool used to pad each programme to ≥65 unique units
+const SHARED_UNIT_POOL = [
+  ["COMM 111", "Communication Skills", 3],
+  ["THEO 111", "Christian Beliefs", 3],
+  ["HSCI 225", "HIV/AIDS", 3],
+  ["ENVI 201", "Environmental Science", 3],
+  ["SOST 131", "Introduction to Sociology", 3],
+  ["MATH 102", "Foundation of Mathematics", 3],
+  ["MATH 103", "Calculus I", 3],
+  ["MATH 104", "Calculus II", 3],
+  ["MATH 110", "Linear Algebra I", 3],
+  ["MATH 132", "Probability and Statistics I", 3],
+  ["MATH 211", "Discrete Structures", 3],
+  ["MATH 230", "Probability and Statistics II", 3],
+  ["MATH 330", "Operations Research", 3],
+  ["BUSS 100", "Principles of Management", 3],
+  ["BUSS 114", "Entrepreneurship", 3],
+  ["BUSS 221", "Fundamentals of Entrepreneurship", 3],
+  ["BUSS 212", "Business Law I", 3],
+  ["BUSS 326", "Organizational Behaviour", 3],
+  ["BUSS 420", "Strategic Management", 3],
+  ["ECON 101", "Principles of Microeconomics", 3],
+  ["ECON 102", "Principles of Macroeconomics", 3],
+  ["ACCT 112", "Principles of Accounting I", 3],
+  ["MKTG 218", "Principles of Marketing", 3],
+  ["FINA 213", "Financial Management I", 3],
+  ["COMP 100", "Computer Applications", 3],
+  ["COMP 101", "Introduction to Computer Science", 3],
+  ["COMP 110", "Introduction to Programming", 3],
+  ["COMP 111", "Structured Programming", 3],
+  ["COMP 131", "Introduction to Computer Networks", 3],
+  ["COMP 210", "Data Structures", 3],
+  ["COMP 220", "System Analysis and Design", 3],
+  ["COMP 300", "Operating Systems", 3],
+  ["COMP 340", "Database Management System", 3],
+  ["PHYS 310", "Electrical Circuits", 3],
+  ["ELEC 104", "Analog Electronics", 3],
+  ["ELEC 204", "Digital Electronics", 3],
+  ["RESE 301", "Research Methods", 3],
+  ["RESE 401", "Research Project", 6],
+  ["INDS 400", "Industrial Attachment", 3],
+  ["LEAD 210", "Leadership and Ethics", 3],
+  ["COMM 210", "Professional Communication", 3],
+  ["STAT 210", "Applied Statistics", 3],
+  ["PHIL 110", "Critical Thinking", 3],
+  ["HIST 110", "History of Kenya", 3],
+  ["GEOG 110", "Introduction to Geography", 3],
+  ["PSYC 110", "Introduction to Psychology", 3],
+  ["LAWS 110", "Introduction to Law", 3],
+  ["ENTR 032", "Entrepreneurship Skills", 3],
+  ["PROJ 310", "Project Planning and Management", 3],
+  ["QUAL 320", "Quality Assurance", 3],
+  ["INNO 330", "Innovation and Design Thinking", 3],
+  ["DATA 340", "Introduction to Data Analytics", 3],
+  ["CYBR 350", "Cybersecurity Fundamentals", 3],
+  ["CLD 360", "Cloud Computing Basics", 3],
+  ["WEB 370", "Web Technologies", 3],
+  ["MOB 380", "Mobile Computing", 3],
+  ["AI 390", "Introduction to Artificial Intelligence", 3],
+  ["ETH 200", "Professional Ethics", 3],
+  ["DEV 220", "Development Studies", 3],
+  ["HLTH 240", "Community Health", 3],
+  ["NUTR 250", "Nutrition and Wellness", 3],
+  ["AGRI 260", "Agriculture and Society", 3],
+  ["TOUR 270", "Tourism and Hospitality Fundamentals", 3],
+  ["MEDA 280", "Media and Society", 3],
+  ["PEAC 290", "Peace and Conflict Studies", 3],
+  ["ANTH 110", "Introduction to Anthropology", 3],
+  ["SOCI 210", "Social Research Methods", 3],
+  ["SOCI 220", "Gender and Development", 3],
+  ["POLI 110", "Introduction to Political Science", 3],
+  ["POLI 210", "Comparative Politics", 3],
+  ["IR 220", "International Relations Theory", 3],
+  ["DIPL 230", "Diplomatic Practice", 3],
+  ["LANG 110", "Academic Writing", 3],
+  ["LANG 120", "Kiswahili Communication", 3],
+  ["FREN 110", "French for Beginners", 3],
+  ["BIOL 110", "General Biology", 3],
+  ["CHEM 110", "General Chemistry", 3],
+  ["PHYS 110", "General Physics", 3],
+  ["MATH 200", "Calculus III", 3],
+  ["MATH 210", "Linear Algebra II", 3],
+  ["MATH 220", "Ordinary Differential Equations", 3],
+  ["MATH 310", "Real Analysis", 3],
+  ["STAT 310", "Inferential Statistics", 3],
+  ["ACCT 219", "Cost Accounting", 3],
+  ["ACCT 301", "Financial Accounting II", 3],
+  ["FINA 301", "Corporate Finance", 3],
+  ["HRM 210", "Human Resource Management", 3],
+  ["HRM 320", "Performance Management", 3],
+  ["MKTG 320", "Digital Marketing", 3],
+  ["MKTG 330", "Consumer Behaviour", 3],
+  ["SUPP 210", "Supply Chain Management", 3],
+  ["OPER 220", "Operations Management", 3],
+  ["ENTR 310", "Business Planning", 3],
+  ["ENTR 320", "Social Entrepreneurship", 3],
+  ["HSMU 116", "Foundations of Health Systems Management", 3],
+  ["HSMU 137", "Epidemiology and Demography", 3],
+  ["NURS 110", "Foundations of Nursing", 3],
+  ["PHAR 110", "Introduction to Pharmacy", 3],
+  ["MLAB 110", "Laboratory Techniques", 3],
+  ["CLIN 110", "Clinical Methods", 3],
+  ["PUBH 210", "Public Health Principles", 3],
+  ["NUTR 210", "Human Nutrition", 3],
+  ["HOSP 110", "Introduction to Hospitality", 3],
+  ["TOUR 110", "Tourism Principles", 3],
+  ["THEO 051", "Introduction to Study of Theology", 3],
+  ["THEO 060", "Christian Doctrines", 3],
+  ["CRIM 110", "Introduction to Criminology", 3],
+  ["CRIM 210", "Security Management", 3],
+  ["JOUR 110", "Introduction to Journalism", 3],
+  ["JOUR 210", "Media Ethics", 3],
+  ["EDUC 110", "Foundations of Education", 3],
+  ["EDUC 210", "Curriculum Studies", 3],
+  ["AGRI 110", "Principles of Agriculture", 3],
+  ["ENVS 210", "Environmental Management", 3],
+  ["GIS 220", "Geographic Information Systems", 3],
+  ["SOFT 410", "Software Testing", 3],
+  ["SOFT 420", "DevOps Fundamentals", 3],
+  ["NETW 410", "Network Administration", 3],
+  ["NETW 420", "Wireless Networks", 3],
+  ["DBMS 410", "Advanced Databases", 3],
+  ["DBMS 420", "Big Data Technologies", 3],
+  ["AI 410", "Machine Learning Basics", 3],
+  ["AI 420", "Neural Networks", 3],
+  ["SEC 410", "Ethical Hacking Fundamentals", 3],
+  ["SEC 420", "Digital Forensics", 3],
+  ["UX 310", "User Experience Design", 3],
+  ["UX 320", "Interface Prototyping", 3],
+  ["IOT 330", "Internet of Things", 3],
+  ["BC 340", "Blockchain Fundamentals", 3],
+  ["BC 350", "Smart Contracts", 3]
+];
+
+function expandAllCurricula(minUnits = 95) {
+  for (const progName of Object.keys(CURRICULUM)) {
+    const terms = CURRICULUM[progName];
+    const seen = new Set();
+    const ordered = [];
+    for (const t of ['1', '2', '3']) {
+      for (const row of (terms[t] || [])) {
+        const code = String(row[0] || '').trim();
+        const key = code.toUpperCase();
+        if (!code || seen.has(key)) continue;
+        seen.add(key);
+        ordered.push([code, row[1] || code, row[2] || 3]);
+      }
+    }
+    // Pad from shared pool
+    for (const row of SHARED_UNIT_POOL) {
+      if (ordered.length >= minUnits) break;
+      const key = String(row[0]).toUpperCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      ordered.push([row[0], row[1], row[2] || 3]);
+    }
+    // Pad with programme-specific electives if still short
+    let n = 1;
+    const prefix = progName.replace(/[^A-Za-z]/g, ' ').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 4).toUpperCase() || 'ELCT';
+    while (ordered.length < minUnits) {
+      const code = `${prefix} ${500 + n}`;
+      const key = code.toUpperCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        ordered.push([code, `Programme Elective ${n}`, 3]);
+      }
+      n += 1;
+      if (n > 200) break;
+    }
+    // Redistribute evenly across trimesters 1/2/3 for catalogue grouping
+    const chunk = Math.ceil(ordered.length / 3);
+    CURRICULUM[progName] = {
+      '1': ordered.slice(0, chunk),
+      '2': ordered.slice(chunk, chunk * 2),
+      '3': ordered.slice(chunk * 2)
+    };
   }
-};
+}
+expandAllCurricula(95);
+
 
 const LECTURERS = ["Mr. Evanson Nyairo", "Mr. Robert M. Murungi", "Ms. Catherine Mueni", "Mr. Timothy Anondo", "Mr. Patrick Kinoti", "Mr. Daniel Muendo", "Dr. Jecton Tocho", "Dr. Lawrence Mwenda", "Dr. Nicholas Mwenda", "Dr. Josephat Kigo", "Dr. Nicholas Riungu", "Mr. Omwando Nyakoni", "Miss Florence Adhiambo", "Miss Faith Mwangi", "Mr. George Okello", "Mr. Vincent Mbandu", "Ms. Grace Mwangi", "Mr. Geoffrey Vundi", "Prof. Paul Maku", "Mr. Edgar Mwangi", "Madam Ann Mukiri", "Ms. Jenu John", "Mr. Peter Waweru", "Dr. David Mushimiyimana", "Mr. David Kaje", "Mr. Joel Charo", "Ms. Julie Kiarie", "Ms. Edith Murugi", "Ms. Winnie Kirimi", "Mr. Kimathi Murungi", "Mr. James Mawira", "Mr. John Mwabu Kirimi", "Mr. Patrick Mudambi", "Mr. Kelvin Kimathi", "Mr. Boaz Wamwai"];
 
@@ -2622,107 +2100,113 @@ function semestersForStudent(issueDate) {
 }
 
 function feeRates(programme) {
+  // tuitionPerUnit: charged per registered unit; other lines are fixed per trimester
   const p = (programme || '').toLowerCase();
   if (p.includes('phd') || p.includes('doctor')) {
-    return { tuition: 95000, registration: 5000, library: 3000, medical: 2500, activity: 1500, exam: 5000 };
+    return { tuitionPerUnit: 12000, registration: 5000, library: 3000, medical: 2500, activity: 1500, exam: 5000 };
   }
   if (p.includes('master') || p.includes('msc') || p.includes('m.ed') || p.includes('m.a') || p.includes('mph')) {
-    return { tuition: 72000, registration: 4000, library: 2500, medical: 2000, activity: 1500, exam: 4000 };
+    return { tuitionPerUnit: 10000, registration: 4000, library: 2500, medical: 2000, activity: 1500, exam: 4000 };
   }
   if (p.includes('diploma') || p.includes('certificate')) {
-    return { tuition: 28000, registration: 2500, library: 1500, medical: 1500, activity: 1000, exam: 2000 };
+    return { tuitionPerUnit: 4500, registration: 2500, library: 1500, medical: 1500, activity: 1000, exam: 2000 };
   }
   if (p.includes('pharmacy') || p.includes('medicine') || p.includes('mbchb') || p.includes('nursing') || p.includes('clinical') || p.includes('medical laboratory')) {
-    return { tuition: 85000, registration: 4500, library: 2500, medical: 3000, activity: 1500, exam: 5000 };
+    return { tuitionPerUnit: 11000, registration: 4500, library: 2500, medical: 3000, activity: 1500, exam: 5000 };
   }
   if (p.includes('computer') || p.includes('information systems') || p.includes('software') || p.includes('cyber') || p.includes('blockchain') || p.includes('artificial') || p.includes('data science') || p.includes('bbit') || p.includes('robotics')) {
-    return { tuition: 52000, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 3000 };
+    return { tuitionPerUnit: 8500, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 3000 };
   }
   if (p.includes('business') || p.includes('commerce') || p.includes('hospitality') || p.includes('tourism') || p.includes('economics')) {
-    return { tuition: 45000, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 2500 };
+    return { tuitionPerUnit: 7500, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 2500 };
   }
   if (p.includes('health systems')) {
-    return { tuition: 55000, registration: 3500, library: 2000, medical: 2500, activity: 1500, exam: 3500 };
+    return { tuitionPerUnit: 9000, registration: 3500, library: 2000, medical: 2500, activity: 1500, exam: 3500 };
   }
-  return { tuition: 48000, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 3000 };
+  return { tuitionPerUnit: 8000, registration: 3000, library: 2000, medical: 2000, activity: 1500, exam: 3000 };
 }
 
-
-function completedUnitCodes(student) {
-  const set = new Set();
-  const explicit = student.completed_units || [];
-  for (const u of explicit) {
-    if (typeof u === 'string') set.add(u.toUpperCase());
-    else if (u?.code) set.add(String(u.code).toUpperCase());
+function unitsForFeeTerm(student, sem, isCurrent) {
+  // Current trimester: bill only units the student has registered
+  if (isCurrent) {
+    const regs = (db.registrations || []).filter(r => r.student_id === student.id && r.status === 'registered');
+    return regs.length;
   }
+  // Past trimesters: use units recorded on provisional results for that semester, else default 6
   try {
     const results = buildResults(student);
-    for (const sem of results.semesters || []) {
-      for (const u of sem.units || []) {
-        if (u.code) set.add(String(u.code).toUpperCase());
-      }
-    }
-  } catch {}
-  return set;
-}
-
-function ensureStudentCompletedUnits(student) {
-  if (Array.isArray(student.completed_units) && student.completed_units.length >= 24) return;
-  const codes = courseCodesForProgramme(student.programme);
-  const fromDb = (db.courses || [])
-    .filter(c => String(c.programme || '') === String(student.programme || '') || codes.some(x => x[0] === c.code))
-    .map(c => [c.code, c.title, c.credits || 3]);
-  const map = new Map();
-  for (const row of [...codes.map(x => [x[0], x[1], 3]), ...fromDb]) {
-    if (row[0]) map.set(String(row[0]).toUpperCase(), { code: row[0], title: row[1], credits: row[2] || 3, status: 'completed' });
-  }
-  const all = [...map.values()];
-  // Leave last 6 for current selection when possible; aim up to 52 completed
-  const leave = all.length > 12 ? 6 : 0;
-  const take = Math.min(52, Math.max(0, all.length - leave));
-  student.completed_units = all.slice(0, take);
+    const match = (results.semesters || []).find(s => s.semester === sem.label);
+    if (match && Array.isArray(match.units) && match.units.length) return match.units.length;
+  } catch (_) { /* ignore */ }
+  return 6;
 }
 
 function buildFeeStatement(student) {
   const rates = feeRates(student.programme);
   const trimesters = semestersForStudent(student.issue_date);
   const payments = student.fee_payments || {};
+  const fixed = rates.registration + rates.library + rates.medical + rates.activity + rates.exam;
   const items = trimesters.map((sem, i) => {
-    const amount = rates.tuition + rates.registration + rates.library + rates.medical + rates.activity + rates.exam;
-    const payment = payments[sem.key];
     const isCurrent = i === trimesters.length - 1;
-    // Explicit payment wins; otherwise past trimesters default cleared, current outstanding
-    let termPaid;
-    if (payment && typeof payment.paid === 'boolean') termPaid = payment.paid;
-    else termPaid = !isCurrent;
+    const unitCount = unitsForFeeTerm(student, sem, isCurrent);
+    const tuition = unitCount * rates.tuitionPerUnit;
+    // Current term with 0 units registered: only fixed charges (or 0 total if you prefer — we still show fixed)
+    const amount = tuition + (unitCount > 0 || !isCurrent ? fixed : 0);
+    const payment = payments[sem.key] || {};
+    let amountPaid = 0;
+    if (typeof payment.amount_paid === 'number' && payment.amount_paid > 0) {
+      amountPaid = Math.min(amount, payment.amount_paid);
+    } else if (payment.paid === true) {
+      amountPaid = amount;
+    } else if (payment.paid !== false && !isCurrent) {
+      amountPaid = amount; // past terms default cleared
+    }
+    const balance = Math.max(0, amount - amountPaid);
+    const termPaid = amount <= 0 || balance <= 0;
+    let status;
+    if (amount <= 0) status = 'No units registered';
+    else if (termPaid) status = payment.method ? `Cleared (${payment.method})` : 'Cleared';
+    else if (amountPaid > 0) status = `Partial (${payment.method || '—'})`;
+    else status = 'Outstanding';
     return {
       key: sem.key,
       semester: sem.label,
       academicYear: sem.academicYear,
-      tuition: rates.tuition,
-      registration: rates.registration,
-      library: rates.library,
-      medical: rates.medical,
-      activity: rates.activity,
-      examination: rates.exam,
+      units: unitCount,
+      tuition_per_unit: rates.tuitionPerUnit,
+      tuition,
+      registration: unitCount > 0 || !isCurrent ? rates.registration : 0,
+      library: unitCount > 0 || !isCurrent ? rates.library : 0,
+      medical: unitCount > 0 || !isCurrent ? rates.medical : 0,
+      activity: unitCount > 0 || !isCurrent ? rates.activity : 0,
+      examination: unitCount > 0 || !isCurrent ? rates.exam : 0,
       total: amount,
+      amount_paid: amountPaid,
       paid: termPaid,
-      balance: termPaid ? 0 : amount,
-      status: termPaid ? (payment?.method ? `Cleared (${payment.method})` : 'Cleared') : 'Outstanding',
-      payment_method: payment?.method || null,
-      paid_at: payment?.paid_at || null
+      balance,
+      status,
+      payment_method: payment.method || null,
+      paid_at: payment.paid_at || null
     };
   });
-  // Recalculate with explicit current outstanding
   const totalBilled = items.reduce((s, x) => s + x.total, 0);
-  const totalPaid = items.reduce((s, x) => s + (x.paid ? x.total : 0), 0);
-  const balance = totalBilled - totalPaid;
+  const totalPaid = items.reduce((s, x) => s + (x.amount_paid || 0), 0);
+  const balance = Math.max(0, totalBilled - totalPaid);
+  const current = items[items.length - 1];
   return {
     currency: 'KES',
     generatedAt: nowIso(),
-    periodNote: 'Fee statement from year of entry through Trimester 3, 2026. Tuition varies by programme level (diploma / bachelor / masters / health professional). Amounts are illustrative KES rates.',
+    periodNote: `Fees are charged per registered unit (KES ${rates.tuitionPerUnit.toLocaleString()} tuition/unit) plus fixed trimester charges. Current term is billed for the units you select in Course Registration.`,
     items,
-    summary: { totalBilled, totalPaid, balance, semesters: items.length }
+    summary: {
+      totalBilled,
+      totalPaid,
+      balance,
+      semesters: items.length,
+      tuitionPerUnit: rates.tuitionPerUnit,
+      currentUnits: current?.units || 0,
+      currentTotal: current?.total || 0
+    }
   };
 }
 
@@ -2734,65 +2218,149 @@ function pickGrade(seed) {
 
 function courseCodesForProgramme(programme) {
   const p = (programme || '').trim();
-  // exact match
-  if (CURRICULUM[p]) {
-    const all = [];
-    for (const t of ['1', '2', '3']) {
-      for (const row of (CURRICULUM[p][t] || [])) all.push([row[0], row[1]]);
-    }
-    return all;
-  }
-  // fuzzy match
-  const key = PROGRAMME_LIST.find(k => k.toLowerCase() === p.toLowerCase()
-    || p.toLowerCase().includes(k.toLowerCase())
-    || k.toLowerCase().includes(p.toLowerCase()));
-  if (key) {
+  const collect = (key) => {
     const all = [];
     for (const t of ['1', '2', '3']) {
       for (const row of (CURRICULUM[key][t] || [])) all.push([row[0], row[1]]);
     }
     return all;
+  };
+  if (CURRICULUM[p]) return collect(p);
+  const pl = p.toLowerCase().replace(/\./g, ' ').replace(/\s+/g, ' ').trim();
+  // exact case-insensitive
+  let key = PROGRAMME_LIST.find(k => k.toLowerCase() === pl || k.toLowerCase() === p.toLowerCase());
+  // includes either way
+  if (!key) key = PROGRAMME_LIST.find(k => pl.includes(k.toLowerCase()) || k.toLowerCase().includes(pl));
+  // token overlap (handles "BSc. Information Science" vs "Diploma in Information Science")
+  if (!key) {
+    const tokens = pl.split(' ').filter(t => t.length > 3 && !['bachelor','science','diploma','degree','master'].includes(t));
+    let best = null, bestScore = 0;
+    for (const k of PROGRAMME_LIST) {
+      const kl = k.toLowerCase();
+      const score = tokens.filter(t => kl.includes(t)).length;
+      if (score > bestScore) { bestScore = score; best = k; }
+    }
+    if (bestScore >= 2) key = best;
   }
+  if (key) return collect(key);
   return [
-    ['GEN 110', 'University Foundation'], ['GEN 121', 'Research Methods'],
     ['COMM 111', 'Communication Skills'], ['THEO 111', 'Christian Beliefs'],
-    ['HSCI 225', 'HIV/AIDS'], ['ENVI 201', 'Environmental Science']
+    ['HSCI 225', 'HIV/AIDS'], ['ENVI 201', 'Environmental Science'],
+    ['SOST 131', 'Introduction to Sociology'], ['MATH 102', 'Foundation of Mathematics']
   ];
 }
 
+function isDiplomaProgramme(programme) {
+  const p = String(programme || '').toLowerCase();
+  return p.includes('diploma') || p.includes('certificate') || p.includes('level 6') && p.includes('diploma');
+}
+
+function targetCompletedUnits(programme) {
+  // Degree programmes: 52 units expected completed; diploma: 45
+  return isDiplomaProgramme(programme) ? 45 : 52;
+}
+
+function minGraduationUnits(programme) {
+  // Minimum completed units required before graduation can be considered
+  return 32;
+}
+
 function buildResults(student) {
+  const PER_SEM = 6; // HARD CAP — never show more than 6 units on a result slip semester
   const semesters = semestersForStudent(student.issue_date);
-  const codes = courseCodesForProgramme(student.programme);
-  const past = semesters.slice(0, -1);
-  const results = past.map((sem, si) => {
-    const units = Array.from({ length: 6 }, (_, ci) => {
-      const pair = codes[ci % codes.length];
+  const rawCodes = courseCodesForProgramme(student.programme) || [];
+  // Unique codes only (preserve order)
+  const seen = new Set();
+  const codes = [];
+  for (const row of rawCodes) {
+    const code = String(row[0] || '').trim();
+    const key = code.toUpperCase();
+    if (!code || seen.has(key)) continue;
+    seen.add(key);
+    codes.push([code, row[1] || code, Number(row[2]) || 3]);
+  }
+  const past = semesters.slice(0, -1); // exclude current trimester
+  const TARGET = targetCompletedUnits(student.programme);
+
+  let remaining = TARGET;
+  let codeIdx = 0;
+  const completedMap = new Map();
+  const results = [];
+
+  for (let si = 0; si < past.length; si++) {
+    if (remaining <= 0 || codeIdx >= codes.length) break;
+    const sem = past[si];
+    const count = Math.min(PER_SEM, remaining, codes.length - codeIdx);
+    if (count < 1) break;
+
+    const units = [];
+    for (let ci = 0; ci < count; ci++) {
+      const pair = codes[codeIdx++];
       const sn = student.student_number || 'x';
-      const grade = pickGrade(sn.charCodeAt(ci % sn.length) + si * 7 + ci * 13);
+      const grade = pickGrade(sn.charCodeAt(ci % sn.length) + si * 7 + ci * 13 + codeIdx);
       const points = { A: 4.0, 'A-': 3.7, 'B+': 3.3, B: 3.0, 'B-': 2.7, 'C+': 2.3, C: 2.0 }[grade] || 2.0;
-      return { code: pair[0], title: pair[1], credits: 3, grade, points };
-    });
-    const totalCredits = units.reduce((s, u) => s + u.credits, 0);
-    const gpa = totalCredits ? (units.reduce((s, u) => s + u.points * u.credits, 0) / totalCredits) : 0;
-    return {
+      const unit = {
+        code: pair[0],
+        title: pair[1],
+        credits: pair[2] || 3,
+        grade,
+        points
+      };
+      units.push(unit);
+      const key = String(unit.code).toUpperCase();
+      if (!completedMap.has(key)) {
+        completedMap.set(key, { code: unit.code, title: unit.title, credits: unit.credits });
+      }
+    }
+
+    // Absolute safety: never more than 6 rows on the slip
+    const slipUnits = units.slice(0, PER_SEM);
+    remaining -= slipUnits.length;
+    const totalCredits = slipUnits.reduce((s, u) => s + u.credits, 0);
+    const gpa = totalCredits
+      ? Math.round((slipUnits.reduce((s, u) => s + u.points * u.credits, 0) / totalCredits) * 100) / 100
+      : 0;
+    results.push({
       semester: sem.label,
       academicYear: sem.academicYear,
-      units,
-      gpa: Math.round(gpa * 100) / 100,
+      units: slipUnits,
+      gpa,
       credits: totalCredits
-    };
-  });
+    });
+  }
+
   const allCredits = results.reduce((s, r) => s + r.credits, 0);
+  const totalUnits = results.reduce((s, r) => s + (r.units?.length || 0), 0);
   const cgpa = allCredits
     ? Math.round((results.reduce((s, r) => s + r.gpa * r.credits, 0) / allCredits) * 100) / 100
     : 0;
+  const completedUnits = Array.from(completedMap.values()).sort((a, b) => a.code.localeCompare(b.code));
+  const programmeType = isDiplomaProgramme(student.programme) ? 'diploma' : 'degree';
+  const finishTarget = TARGET;
+  const gradMin = minGraduationUnits(student.programme);
+
   return {
     generatedAt: nowIso(),
-    note: 'Provisional results (6 units per trimester) from year of entry through the last completed trimester before Trimester 3, 2026.',
+    note: `Provisional results: ${totalUnits} of ${finishTarget} units for this ${programmeType} (minimum ${gradMin} for graduation consideration). Each semester shows exactly ${PER_SEM} units (or fewer on the final term). Completed units cannot be selected again.`,
     semesters: results,
-    summary: { cgpa, totalCredits: allCredits, semestersCompleted: results.length }
+    completedUnits,
+    completedCodes: completedUnits.map(u => u.code),
+    summary: {
+      cgpa,
+      totalCredits: allCredits,
+      totalUnits,
+      unitsRequired: finishTarget,
+      unitsRemaining: Math.max(0, finishTarget - totalUnits),
+      minGraduationUnits: gradMin,
+      eligibleToGraduate: totalUnits >= finishTarget,
+      programmeType,
+      semestersCompleted: results.length,
+      catalogueSize: codes.length,
+      unitsPerSemester: PER_SEM
+    }
   };
 }
+
 
 async function initializeDatabase() {
   await fs.mkdir(dataDir, { recursive: true });
@@ -2802,44 +2370,64 @@ async function initializeDatabase() {
     db.settings.admin_password_hash = hash(ADMIN_PASSWORD);
   }
 
-  // Seed all curriculum units (programme x trimester 1/2/3)
+  // Seed curriculum units — one catalogue entry per unique course CODE (no programme duplicates)
   let lectIdx = 0;
+  const seenCodes = new Set();
   for (const [progName, trimesters] of Object.entries(CURRICULUM)) {
     for (const t of ['1', '2', '3']) {
       for (const row of (trimesters[t] || [])) {
         const [code, title, credits] = row;
+        const codeKey = String(code || '').trim().toUpperCase();
+        if (!codeKey || seenCodes.has(codeKey)) continue;
+        seenCodes.add(codeKey);
         const lecturer = LECTURERS[lectIdx % LECTURERS.length];
         lectIdx += 1;
-        let course = db.courses.find(c => c.code === code && String(c.programme || '') === progName);
-        if (!course) {
-          // also match by code only if single entry
-          course = db.courses.find(c => c.code === code && !c.programme);
-        }
+        let course = db.courses.find(c => String(c.code || '').toUpperCase() === codeKey);
         if (!course) {
           db.courses.push({
             id: createId(),
-            code,
+            code: String(code).trim(),
             title,
             lecturer,
             credits: credits || 3,
             capacity: 60,
             semester: `Trimester ${t}`,
             trimester: Number(t),
-            programme: progName,
+            programme: null, // shared unit — not tied to one programme
             is_active: true,
             created_at: nowIso()
           });
         } else {
-          course.title = title;
-          course.lecturer = lecturer;
-          course.credits = credits || 3;
-          course.semester = `Trimester ${t}`;
-          course.trimester = Number(t);
-          course.programme = progName;
+          course.title = title || course.title;
+          course.lecturer = course.lecturer || lecturer;
+          course.credits = credits || course.credits || 3;
           course.is_active = true;
+          // clear programme lock so unit is available across programmes
+          course.programme = null;
         }
       }
     }
+  }
+
+  // Collapse any leftover duplicate codes (keep earliest, re-point registrations)
+  const byCode = new Map();
+  const removeIds = new Set();
+  for (const c of db.courses) {
+    const key = String(c.code || '').toUpperCase();
+    if (!key) continue;
+    if (!byCode.has(key)) {
+      byCode.set(key, c);
+      c.programme = null;
+    } else {
+      const keep = byCode.get(key);
+      for (const r of db.registrations || []) {
+        if (r.course_id === c.id) r.course_id = keep.id;
+      }
+      removeIds.add(c.id);
+    }
+  }
+  if (removeIds.size) {
+    db.courses = db.courses.filter(c => !removeIds.has(c.id));
   }
 
 
@@ -2850,7 +2438,7 @@ async function initializeDatabase() {
       student_number: 'KEMU/IS/2024/0142',
       full_name: 'Amara Njeri',
       email: 'amara.njeri@students.kemu.ac.ke',
-      programme: 'BSc. Information Science',
+      programme: 'Diploma in Information Science',
       year_level: 3,
       campus: 'Main Campus',
       password_hash: defaultPasswordHash,
@@ -2909,13 +2497,12 @@ async function initializeDatabase() {
   }
 
   for (const s of db.students) {
-    ensureStudentCompletedUnits(s);
     if (!s.password_hash) s.password_hash = defaultPasswordHash;
   }
 
   await saveDb();
   databaseReady = true;
-  console.log(`Database file: ${dbFile} (set DATA_DIR on Render to persist students)`); console.log(`Local database ready at ${dbFile} (${db.students.length} students, ${db.courses.length} courses)`);
+  console.log(`Local database ready at ${dbFile} (${db.students.length} students, ${db.courses.length} courses)`);
 }
 
 async function readBody(req) {
@@ -3057,8 +2644,6 @@ async function handleLogout(req, res) {
 
 function courseRowsForStudent(studentId) {
   const student = db.students.find(s => s.id === studentId);
-  if (student) ensureStudentCompletedUnits(student);
-  const done = student ? completedUnitCodes(student) : new Set();
   const progCodes = new Set(
     (student ? courseCodesForProgramme(student.programme) : []).map(x => String(x[0]).toUpperCase())
   );
@@ -3070,7 +2655,6 @@ function courseRowsForStudent(studentId) {
       const own = db.registrations.find(r => r.course_id === c.id && r.student_id === studentId && r.status === 'registered');
       const codeKey = String(c.code || '').toUpperCase();
       const forProgramme = progCodes.size === 0 || progCodes.has(codeKey) || common.has(codeKey);
-      const completed = done.has(codeKey);
       return {
         id: c.id,
         code: c.code,
@@ -3079,11 +2663,9 @@ function courseRowsForStudent(studentId) {
         credits: c.credits,
         capacity: c.capacity,
         semester: c.semester,
-        trimester: c.trimester,
         enrolled_count: enrolled,
         registration_id: own?.id || null,
         registered: Boolean(own),
-        completed,
         seats_remaining: Math.max(0, c.capacity - enrolled),
         for_programme: forProgramme
       };
@@ -3094,10 +2676,20 @@ function courseRowsForStudent(studentId) {
 
 function adminSnapshot() {
   const students = [...db.students].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
-  const courses = db.courses.map(c => {
-    const enrolled = db.registrations.filter(r => r.course_id === c.id && r.status === 'registered').length;
-    return { ...c, enrolled_count: enrolled, seats_remaining: Math.max(0, c.capacity - enrolled) };
-  }).sort((a, b) => a.code.localeCompare(b.code));
+  // One row per unique course code (no duplicates on admin portal)
+  const seenCodes = new Set();
+  const courses = db.courses
+    .filter(c => {
+      const key = String(c.code || '').toUpperCase();
+      if (!key || seenCodes.has(key)) return false;
+      seenCodes.add(key);
+      return true;
+    })
+    .map(c => {
+      const enrolled = db.registrations.filter(r => r.course_id === c.id && r.status === 'registered').length;
+      return { ...c, enrolled_count: enrolled, seats_remaining: Math.max(0, c.capacity - enrolled) };
+    })
+    .sort((a, b) => a.code.localeCompare(b.code));
   const registrations = db.registrations
     .filter(r => r.status === 'registered')
     .map(r => {
@@ -3161,7 +2753,6 @@ function studentSnapshot(identity) {
     },
     registrations,
     courses: courseRowsForStudent(identity.studentId),
-    completed_units: (student.completed_units || []),
     fees: buildFeeStatement(student),
     results: buildResults(student)
   };
@@ -3172,10 +2763,10 @@ async function registerStudent(studentId, courseId) {
   if (!course) throw Object.assign(new Error('Course not found'), { httpStatus: 404 });
   const student = db.students.find(s => s.id === studentId);
   if (student) {
-    ensureStudentCompletedUnits(student);
-    const done = completedUnitCodes(student);
+    const results = buildResults(student);
+    const done = new Set((results.completedCodes || []).map(c => String(c).toUpperCase()));
     if (done.has(String(course.code || '').toUpperCase())) {
-      throw Object.assign(new Error('You have already completed this unit and cannot register it again'), { httpStatus: 409 });
+      throw Object.assign(new Error('This unit has already been completed and cannot be registered again'), { httpStatus: 409 });
     }
   }
   const enrolled = db.registrations.filter(r => r.course_id === courseId && r.status === 'registered').length;
@@ -3206,89 +2797,6 @@ async function withdrawRegistration(studentId, courseId) {
   reg.status = 'withdrawn';
   reg.withdrawn_at = nowIso();
   await saveDb();
-}
-
-
-function escapeHtmlServer(value) {
-  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function documentShell(title, bodyHtml) {
-  const addr = CAMPUS_ADDRESSES.main;
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>${escapeHtmlServer(title)}</title>
-<style>
-  body{font-family:Georgia,serif;color:#1a1a1a;margin:0;padding:24px;background:#fff}
-  .sheet{max-width:900px;margin:0 auto}
-  .hdr{display:flex;gap:16px;align-items:flex-start;border-bottom:2px solid #5b0a4c;padding-bottom:14px;margin-bottom:18px}
-  .hdr img{height:72px;width:auto;flex-shrink:0}
-  .hdr-text{flex:1}
-  .hdr h1{margin:0 0 6px;font-size:18px;letter-spacing:.04em;color:#5b0a4c;text-transform:uppercase}
-  .hdr p{margin:2px 0;font-size:12px;color:#333;line-height:1.45}
-  table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}
-  th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}
-  th{background:#f5eef3}
-  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:12px}
-  .foot{margin-top:24px;font-size:11px;color:#555;border-top:1px solid #ddd;padding-top:10px}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#e8f5e9;font-size:11px}
-  @media print{body{padding:0}.no-print{display:none}}
-</style></head><body><div class="sheet">
-<div class="hdr">
-  <img src="/kemu-logo.png" alt="KeMU logo"/>
-  <div class="hdr-text">
-    <h1>${escapeHtmlServer(addr.name)}</h1>
-    <p>${escapeHtmlServer(addr.lines[0])}</p>
-    <p>${escapeHtmlServer(addr.lines[1])}</p>
-    <p>${escapeHtmlServer(addr.lines[2])}</p>
-  </div>
-</div>
-${bodyHtml}
-<div class="foot">
-  <p>Generated from KeMU Student Portal · ${escapeHtmlServer(new Date().toLocaleString())}</p>
-  <p class="no-print"><button onclick="window.print()">Print / Save as PDF</button></p>
-</div>
-</div></body></html>`;
-}
-
-function resultsPdfHtml(student) {
-  const results = buildResults(student);
-  let body = `<h2 style="color:#5b0a4c;margin:0 0 8px">Provisional Academic Results</h2>
-  <div class="meta">
-    <div><strong>Name:</strong> ${escapeHtmlServer(student.full_name)}</div>
-    <div><strong>Reg. No:</strong> ${escapeHtmlServer(student.student_number)}</div>
-    <div><strong>Programme:</strong> ${escapeHtmlServer(student.programme)}</div>
-    <div><strong>CGPA:</strong> ${escapeHtmlServer(results.summary?.cgpa ?? '—')} · Credits: ${escapeHtmlServer(results.summary?.totalCredits || 0)}</div>
-  </div>`;
-  for (const sem of results.semesters || []) {
-    body += `<h3 style="margin:16px 0 6px">${escapeHtmlServer(sem.semester)} · GPA ${escapeHtmlServer(sem.gpa)}</h3>
-    <table><thead><tr><th>Code</th><th>Unit</th><th>Credits</th><th>Grade</th><th>Points</th></tr></thead><tbody>`;
-    for (const u of sem.units || []) {
-      body += `<tr><td>${escapeHtmlServer(u.code)}</td><td>${escapeHtmlServer(u.title)}</td><td>${u.credits}</td><td>${escapeHtmlServer(u.grade)}</td><td>${u.points}</td></tr>`;
-    }
-    body += `</tbody></table>`;
-  }
-  body += `<p style="font-size:12px;color:#666">${escapeHtmlServer(results.note || '')}</p>`;
-  return documentShell(`KeMU Results — ${student.student_number}`, body);
-}
-
-function feesPdfHtml(student) {
-  const fees = buildFeeStatement(student);
-  let body = `<h2 style="color:#5b0a4c;margin:0 0 8px">Fee Statement</h2>
-  <div class="meta">
-    <div><strong>Name:</strong> ${escapeHtmlServer(student.full_name)}</div>
-    <div><strong>Reg. No:</strong> ${escapeHtmlServer(student.student_number)}</div>
-    <div><strong>Programme:</strong> ${escapeHtmlServer(student.programme)}</div>
-    <div><strong>Balance:</strong> KES ${Number(fees.summary?.balance || 0).toLocaleString()}</div>
-  </div>
-  <p style="font-size:12px">${escapeHtmlServer(fees.periodNote || '')}</p>
-  <table><thead><tr><th>Trimester</th><th>Tuition</th><th>Reg</th><th>Library</th><th>Medical</th><th>Activity</th><th>Exam</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
-  for (const item of fees.items || []) {
-    body += `<tr><td>${escapeHtmlServer(item.semester)}</td><td>${item.tuition}</td><td>${item.registration}</td><td>${item.library}</td><td>${item.medical}</td><td>${item.activity}</td><td>${item.examination}</td><td><strong>${item.total}</strong></td><td>${escapeHtmlServer(item.status)}</td></tr>`;
-  }
-  body += `</tbody></table>
-  <p><strong>Total billed:</strong> KES ${Number(fees.summary?.totalBilled || 0).toLocaleString()} ·
-  <strong>Total paid:</strong> KES ${Number(fees.summary?.totalPaid || 0).toLocaleString()} ·
-  <strong>Outstanding:</strong> KES ${Number(fees.summary?.balance || 0).toLocaleString()}</p>`;
-  return documentShell(`KeMU Fee Statement — ${student.student_number}`, body);
 }
 
 async function api(req, res, url) {
@@ -3559,10 +3067,44 @@ async function api(req, res, url) {
     if (!allowed.includes(method)) throw Object.assign(new Error('Invalid payment method'), { httpStatus: 400 });
     const student = db.students.find(s => s.id === identity.studentId);
     if (!student) throw Object.assign(new Error('Student not found'), { httpStatus: 404 });
+
+    // Work out term total from current fee schedule
+    const statement = buildFeeStatement(student);
+    const item = (statement.items || []).find(x => x.key === termKey);
+    if (!item) throw Object.assign(new Error('Fee item not found for that trimester'), { httpStatus: 404 });
+    const termTotal = Number(item.total) || 0;
+    const alreadyPaid = Number(item.amount_paid) || 0;
+    const outstanding = Math.max(0, termTotal - alreadyPaid);
+    if (outstanding <= 0) throw Object.assign(new Error('This trimester is already fully paid'), { httpStatus: 400 });
+
+    // Amount: optional. If omitted or >= outstanding → full payment; else partial.
+    let payAmount = Number(body.amount);
+    if (!Number.isFinite(payAmount) || payAmount <= 0) {
+      payAmount = outstanding; // full remaining
+    }
+    payAmount = Math.round(payAmount * 100) / 100;
+    if (payAmount > outstanding) payAmount = outstanding;
+
     if (!student.fee_payments) student.fee_payments = {};
-    student.fee_payments[termKey] = { paid: true, method, paid_at: nowIso(), recorded_by: 'student' };
+    const prev = student.fee_payments[termKey] || {};
+    const newPaid = Math.min(termTotal, alreadyPaid + payAmount);
+    const fullyPaid = newPaid >= termTotal;
+    student.fee_payments[termKey] = {
+      paid: fullyPaid,
+      amount_paid: newPaid,
+      method,
+      paid_at: nowIso(),
+      recorded_by: 'student',
+      last_payment_amount: payAmount,
+      history: [...(prev.history || []), { amount: payAmount, method, at: nowIso() }]
+    };
     await saveDb();
-    json(res, 200, { ok: true, message: `Payment recorded via ${method}`, ...studentSnapshot(identity) });
+    const label = fullyPaid ? 'Full payment' : 'Partial payment';
+    json(res, 200, {
+      ok: true,
+      message: `${label} of KES ${payAmount.toLocaleString()} recorded via ${method}`,
+      ...studentSnapshot(identity)
+    });
     return;
   }
 
@@ -3586,28 +3128,6 @@ async function api(req, res, url) {
     }
     await saveDb();
     json(res, 200, { ok: true, message: `Cleared ${targets.length} trimester(s)`, ...adminSnapshot() });
-    return;
-  }
-
-
-  if (pathname === '/api/results/pdf' && req.method === 'GET') {
-    const identity = requireIdentity(req, res);
-    if (!identity || identity.role !== 'student') { if (identity) json(res, 403, { error: 'student_required' }); return; }
-    const student = db.students.find(s => s.id === identity.studentId);
-    if (!student) throw Object.assign(new Error('Student not found'), { httpStatus: 404 });
-    const html = resultsPdfHtml(student);
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Disposition': 'inline; filename="kemu-results.html"' });
-    res.end(html);
-    return;
-  }
-  if (pathname === '/api/fees/pdf' && req.method === 'GET') {
-    const identity = requireIdentity(req, res);
-    if (!identity || identity.role !== 'student') { if (identity) json(res, 403, { error: 'student_required' }); return; }
-    const student = db.students.find(s => s.id === identity.studentId);
-    if (!student) throw Object.assign(new Error('Student not found'), { httpStatus: 404 });
-    const html = feesPdfHtml(student);
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Disposition': 'inline; filename="kemu-fee-statement.html"' });
-    res.end(html);
     return;
   }
 

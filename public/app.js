@@ -1,4 +1,6 @@
-const brandMark = (size = 40) => `<img class="brand-logo" src="/kemu-logo.png" alt="KeMU" width="${size}" height="${size}" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:8px;background:#fff" />`;
+const logoPath = '/manus-storage/KeMU-Corporate-Logo-Full-1_f6fcbf97.png';
+const logoIconPath = '/manus-storage/kemu-icon.png';
+const brandMark = (size = 40) => `<span class="brand-mark" style="width:${size}px;height:${size}px" aria-hidden="true"><img src="${logoIconPath}" alt="KeMU" width="${size}" height="${size}" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;display:block" /></span>`;
 
 const iconPaths = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -35,7 +37,7 @@ const adminNav = [
   ['admin', 'Admin Overview', 'grid'], ['students', 'Students', 'user'], ['courses', 'Unit Management', 'book'], ['registrations', 'Registrations', 'calendar']
 ];
 
-const state = { auth: null, data: null, activeSection: 'overview', mobileMenu: false, expandedCourses: new Set(), selectedUnits: new Set(), unitFilter: '', loading: true, loginError: '', editingStudentId: null, editingCourseId: null, unitAdminFilter: '', selectedProgramme: '' };
+const state = { auth: null, data: null, activeSection: 'overview', mobileMenu: false, expandedCourses: new Set(), selectedUnits: new Set(), unitFilter: '', loading: true, loginError: '', editingStudentId: null, editingCourseId: null, unitAdminFilter: '', selectedProgramme: '', adminSelectedStudent: '', adminSelectedUnits: new Set(), adminUnitFilter: '' };
 let toastTimer;
 
 async function apiRequest(path, options = {}) {
@@ -83,29 +85,32 @@ function formatMoney(value) {
 function loginView(message = '') {
   const msg = message || state.loginError;
   return `<div class="login-page">
-  <div class="login-card login-card-simple">
-    <div class="login-brand">
-      <img src="/kemu-logo.png" alt="Kenya Methodist University" class="login-logo" />
-      <div class="login-brand-text">
-        <strong>Kenya Methodist University</strong>
-        <span>Student Portal</span>
+  <div class="login-shell login-shell-simple">
+    <div class="login-card">
+      <div class="login-brand">
+        ${brandMark(52)}
+        <div class="login-brand-text">
+          <strong>Kenya Methodist University</strong>
+          <span>Student Portal</span>
+        </div>
       </div>
+      ${msg ? `<div class="login-message" role="alert">${icon('warning')}<span>${escapeHtml(msg)}</span></div>` : ''}
+      <form id="local-login-form" class="login-form" autocomplete="on">
+        <label class="field">
+          <span>Registration number</span>
+          <input name="student_number" type="text" required autocomplete="username" placeholder="Reg" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input name="password" type="password" required autocomplete="current-password" placeholder="Enter password" />
+        </label>
+        <button type="submit" class="primary-button login-button">Sign in ${icon('arrow')}</button>
+      </form>
     </div>
-    ${msg ? `<div class="login-message" role="alert">${icon('warning')}<span>${escapeHtml(msg)}</span></div>` : ''}
-    <form id="local-login-form" class="login-form" autocomplete="on">
-      <label class="field">
-        <span>Registration number</span>
-        <input name="student_number" type="text" required autocomplete="username" placeholder="Reg" />
-      </label>
-      <label class="field">
-        <span>Password</span>
-        <input name="password" type="password" required autocomplete="current-password" placeholder="Password" />
-      </label>
-      <button type="submit" class="primary-button login-button">Sign in ${icon('arrow')}</button>
-    </form>
   </div>
 </div>`;
 }
+
 
 function navItems() { return state.auth?.role === 'admin' ? adminNav : studentNav; }
 function currentTitle() { return (navItems().find(item => item[0] === state.activeSection) || navItems()[0])[1]; }
@@ -191,9 +196,16 @@ function studentOverview() {
 function registrationView() {
   const courses = state.data?.courses || [];
   const regs = state.data?.registrations || [];
+  const results = state.data?.results || {};
+  const completedCodes = new Set((results.completedCodes || []).map(c => String(c).toUpperCase()));
+  const completedUnits = results.completedUnits || [];
   const mine = courses.filter(c => c.registered);
-  const available = courses.filter(c => !c.registered && !c.completed);
-  const completedList = state.data?.completed_units?.length ? state.data.completed_units : courses.filter(c => c.completed);
+  // Only programme units; exclude already completed so they cannot be selected again
+  const available = courses.filter(c =>
+    c.for_programme !== false &&
+    !c.registered &&
+    !completedCodes.has(String(c.code || '').toUpperCase())
+  );
   const filter = (state.unitFilter || '').trim().toLowerCase();
   const filtered = filter
     ? available.filter(c => `${c.code} ${c.title} ${c.lecturer} ${c.semester}`.toLowerCase().includes(filter))
@@ -203,26 +215,26 @@ function registrationView() {
     return sum + Number(c?.credits || 0);
   }, 0);
   const myCredits = mine.reduce((s, c) => s + Number(c.credits || 0), 0);
+  const completedCount = results.summary?.totalUnits || completedUnits.length || completedCodes.size;
+  const unitsRequired = results.summary?.unitsRequired || (String(state.data?.student?.programme || '').toLowerCase().includes('diploma') ? 45 : 52);
+  const unitsRemaining = results.summary?.unitsRemaining ?? Math.max(0, unitsRequired - completedCount);
 
-  return `<section class="page-header"><div><span class="eyebrow">Registration</span><h1>Course & unit selection — Trimester 3, 2026</h1><p>Units shown match your programme structure (plus common university units). Select, review your basket, then register. Withdraw while the window is open.</p></div></section>
+  return `<section class="page-header"><div><span class="eyebrow">Registration</span><h1>Course & unit selection — Trimester 3, 2026</h1><p>Units you have already completed (${completedCount} of ${unitsRequired}) are excluded from the catalogue so they cannot be selected twice. ${unitsRemaining} units remaining to finish. Select new units, review your basket, then register.</p></div></section>
 
   <div class="stat-grid">
     <article class="stat-card"><span class="stat-label">Registered units</span><strong>${mine.length}</strong><span class="stat-meta">${myCredits} credits</span></article>
     <article class="stat-card"><span class="stat-label">In basket</span><strong>${state.selectedUnits.size}</strong><span class="stat-meta">${selectedCredits} credits pending</span></article>
     <article class="stat-card"><span class="stat-label">Available units</span><strong>${available.length}</strong></article>
+    <article class="stat-card"><span class="stat-label">Completed units</span><strong>${completedCount}</strong><span class="stat-meta">of ${unitsRequired} · ${unitsRemaining} left</span></article>
   </div>
 
   <div class="selection-layout">
-    ${(completedList && completedList.length) ? `<div class="panel"><div class="panel-header"><h2>Completed units</h2><span class="badge">${completedList.length}</span></div>
-      <p class="panel-note">Already on your record — these cannot be selected again.</p>
-      <div class="table-wrap"><table><thead><tr><th>Code</th><th>Title</th><th>Credits</th><th>Status</th></tr></thead>
-      <tbody>${completedList.slice(0, 60).map(u => `<tr><td><strong>${escapeHtml(u.code)}</strong></td><td>${escapeHtml(u.title || '')}</td><td>${u.credits || 3}</td><td><span class="badge success">Completed</span></td></tr>`).join('')}</tbody></table></div></div>` : ''}
-  <div class="panel">
+    <div class="panel">
       <div class="panel-header">
         <h2>Unit catalogue</h2>
         <input class="filter-input" type="search" placeholder="Search code, title, lecturer…" value="${escapeHtml(state.unitFilter || '')}" data-unit-filter />
       </div>
-      <p class="panel-note">Tick units to add them to your selection basket, then click <strong>Register selected units</strong>.</p>
+      <p class="panel-note">Tick units to add them to your selection basket, then click <strong>Register selected units</strong>. Completed units are hidden here.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th></th><th>Code</th><th>Unit / course title</th><th>Credits</th><th>Lecturer</th><th>Trimester</th><th>Seats</th></tr></thead>
@@ -239,7 +251,7 @@ function registrationView() {
                 <td>${escapeHtml(c.semester)}</td>
                 <td><span class="badge ${full ? 'warning' : 'success'}">${full ? 'Full' : c.seats_remaining}</span></td>
               </tr>`;
-            }).join('') : '<tr><td colspan="7" class="empty-copy">No matching units. Clear the search or ask admin to add courses.</td></tr>'}
+            }).join('') : '<tr><td colspan="7" class="empty-copy">No matching units available. Completed units are excluded; clear the search or ask admin to add new courses.</td></tr>'}
           </tbody>
         </table>
       </div>
@@ -270,31 +282,48 @@ function registrationView() {
           <td><button type="button" class="text-button danger-text" data-withdraw="${c.id}">Withdraw</button></td>
         </tr>`).join('')}</tbody></table></div>` : '<p class="empty-copy">You have not registered any units this trimester.</p>'}
       </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Completed units (${completedCount} of ${unitsRequired})</h2></div>
+        <p class="panel-note">These units appear on your provisional results and cannot be selected again. Programme requires ${unitsRequired} units to finish (${unitsRemaining} remaining).</p>
+        ${completedUnits.length ? `<div class="table-wrap"><table><thead><tr><th>Code</th><th>Title</th><th>Cr</th></tr></thead>
+        <tbody>${completedUnits.slice(0, 40).map(u => `<tr>
+          <td><strong>${escapeHtml(u.code)}</strong></td>
+          <td>${escapeHtml(u.title)}</td>
+          <td>${u.credits || 3}</td>
+        </tr>`).join('')}${completedUnits.length > 40 ? `<tr><td colspan="3" class="empty-copy">… and ${completedUnits.length - 40} more (see Results)</td></tr>` : ''}</tbody></table></div>` : '<p class="empty-copy">No completed units on record yet.</p>'}
+      </div>
     </div>
   </div>`;
 }
+
 
 function feesView() {
   const fees = state.data?.fees;
   const student = state.data?.student || {};
   if (!fees) return genericPage('fees');
-  const outstanding = (fees.items || []).filter(i => !i.paid);
-  return `<section class="page-header"><div><span class="eyebrow">Fee statement</span><h1>Fees from year of entry to Trimester 3, 2026</h1><p>${escapeHtml(student.full_name || '')} · ${escapeHtml(student.student_number || '')}</p></div><a class="primary-button" href="/api/fees/pdf" target="_blank" rel="noopener">Download fee statement (PDF)</a></section>
+  const outstanding = (fees.items || []).filter(i => !i.paid && (i.balance || 0) > 0);
+  const rate = fees.summary?.tuitionPerUnit || 0;
+  const curUnits = fees.summary?.currentUnits || 0;
+  return `<section class="page-header"><div><span class="eyebrow">Fee statement</span><h1>Fees charged by units selected</h1><p>${escapeHtml(student.full_name || '')} · ${escapeHtml(student.student_number || '')}</p></div><button type="button" class="primary-button" data-action="print-fees">Print fee statement ${icon('file')}</button></section>
   <div class="stat-grid">
     <article class="stat-card"><span class="stat-label">Total billed</span><strong>KES ${formatMoney(fees.summary?.totalBilled)}</strong></article>
     <article class="stat-card"><span class="stat-label">Total paid</span><strong>KES ${formatMoney(fees.summary?.totalPaid)}</strong></article>
     <article class="stat-card"><span class="stat-label">Outstanding</span><strong>KES ${formatMoney(fees.summary?.balance)}</strong></article>
-    <article class="stat-card"><span class="stat-label">Trimesters</span><strong>${fees.summary?.semesters || 0}</strong></article>
+    <article class="stat-card"><span class="stat-label">Current term units</span><strong>${curUnits}</strong><span class="stat-meta">@ KES ${formatMoney(rate)}/unit</span></article>
   </div>
-  <p class="panel-note">${escapeHtml(fees.periodNote || '')}</p>
+  <p class="panel-note">${escapeHtml(fees.periodNote || '')} Register more units under Course Registration to update this term’s bill.</p>
 
-  ${outstanding.length ? `<div class="panel"><div class="panel-header"><h2>Pay outstanding fees</h2></div>
-  <p class="panel-note">After selecting units, clear your balance using one of the methods below. This is a demonstration payment record (no real gateway).</p>
+  ${outstanding.length ? `<div class="panel"><div class="panel-header"><h2>Pay fees (full or partial)</h2></div>
+  <p class="panel-note">Enter any amount up to the outstanding balance for the selected trimester. Leave amount blank to pay the full remaining balance. This is a demonstration payment record (no real gateway).</p>
   <form id="fee-pay-form" class="form-grid">
     <label class="field"><span>Trimester</span>
-      <select name="term_key" required>
-        ${outstanding.map(i => `<option value="${escapeHtml(i.key)}">${escapeHtml(i.semester)} — KES ${formatMoney(i.total)}</option>`).join('')}
+      <select name="term_key" required data-term-select>
+        ${outstanding.map(i => `<option value="${escapeHtml(i.key)}" data-balance="${i.balance}" data-total="${i.total}">${escapeHtml(i.semester)} — Outstanding KES ${formatMoney(i.balance)} (of ${formatMoney(i.total)})</option>`).join('')}
       </select>
+    </label>
+    <label class="field"><span>Amount to pay (KES)</span>
+      <input name="amount" type="number" min="1" step="1" placeholder="Full balance if left blank" data-amount-input />
     </label>
     <label class="field"><span>Payment method</span>
       <select name="method" required>
@@ -305,11 +334,28 @@ function feesView() {
       </select>
     </label>
     <button type="submit" class="primary-button">Record payment</button>
-  </form></div>` : `<div class="panel"><p class="empty-copy">No outstanding balance. All listed trimesters are cleared.</p></div>`}
+  </form>
+  <p class="panel-note" data-pay-hint>Tip: type a smaller amount for a partial payment (e.g. 10000). The remaining balance stays outstanding until fully cleared.</p>
+  </div>` : `<div class="panel"><p class="empty-copy">No outstanding balance. All listed trimesters are cleared.</p></div>`}
 
-  <div class="panel"><div class="panel-header"><h2>Trimester breakdown</h2></div>
-  <div class="table-wrap"><table><thead><tr><th>Trimester</th><th>Tuition</th><th>Registration</th><th>Library</th><th>Medical</th><th>Activity</th><th>Exam</th><th>Total</th><th>Status</th></tr></thead>
-  <tbody>${(fees.items || []).map(item => `<tr class="${item.paid ? '' : 'row-outstanding'}"><td>${escapeHtml(item.semester)}</td><td>${formatMoney(item.tuition)}</td><td>${formatMoney(item.registration)}</td><td>${formatMoney(item.library)}</td><td>${formatMoney(item.medical)}</td><td>${formatMoney(item.activity)}</td><td>${formatMoney(item.examination)}</td><td><strong>${formatMoney(item.total)}</strong></td><td><span class="badge ${item.paid ? 'success' : 'warning'}">${escapeHtml(item.status)}</span></td></tr>`).join('')}</tbody></table></div>
+  <div class="panel"><div class="panel-header"><h2>Trimester breakdown (units × rate + fixed charges)</h2></div>
+  <div class="table-wrap"><table><thead><tr><th>Trimester</th><th>Units</th><th>Tuition</th><th>Fixed charges</th><th>Total billed</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>
+  <tbody>${(fees.items || []).map(item => {
+    const bal = item.balance ?? (item.paid ? 0 : item.total);
+    const paidAmt = item.amount_paid ?? (item.paid ? item.total : 0);
+    const fixed = (item.registration || 0) + (item.library || 0) + (item.medical || 0) + (item.activity || 0) + (item.examination || 0);
+    const badge = item.paid ? 'success' : (paidAmt > 0 ? 'warning' : 'warning');
+    return `<tr class="${item.paid ? '' : 'row-outstanding'}">
+      <td>${escapeHtml(item.semester)}</td>
+      <td><strong>${item.units ?? '—'}</strong></td>
+      <td>${formatMoney(item.tuition)} <span class="stat-meta">(${item.units || 0} × ${formatMoney(item.tuition_per_unit || 0)})</span></td>
+      <td>${formatMoney(fixed)}</td>
+      <td>${formatMoney(item.total)}</td>
+      <td>${formatMoney(paidAmt)}</td>
+      <td><strong>${formatMoney(bal)}</strong></td>
+      <td><span class="badge ${badge}">${escapeHtml(item.status)}</span></td>
+    </tr>`;
+  }).join('')}</tbody></table></div>
   </div>`;
 }
 
@@ -317,19 +363,27 @@ function resultsView() {
   const results = state.data?.results;
   const student = state.data?.student || {};
   if (!results) return genericPage('results');
-  return `<section class="page-header"><div><span class="eyebrow">Academic results</span><h1>Provisional results (6 units per trimester)</h1><p>${escapeHtml(student.full_name || '')} · ${escapeHtml(student.student_number || '')} · CGPA ${results.summary?.cgpa ?? '—'}</p></div>
-  <div class="page-header-actions"><a class="primary-button" href="/api/results/pdf" target="_blank" rel="noopener">Download results (PDF)</a>
-  <button type="button" class="secondary-button" data-action="download-results">Download text</button></div></section>
+  const req = results.summary?.unitsRequired || 52;
+  const done = results.summary?.totalUnits || 0;
+  const left = results.summary?.unitsRemaining ?? Math.max(0, req - done);
+  const gradMin = results.summary?.minGraduationUnits || 32;
+  const eligible = results.summary?.eligibleToGraduate || done >= req;
+  return `<section class="page-header"><div><span class="eyebrow">Academic results</span><h1>Provisional results</h1><p>${escapeHtml(student.full_name || '')} · ${escapeHtml(student.student_number || '')} · CGPA ${results.summary?.cgpa ?? '—'}</p></div>
+  <button type="button" class="primary-button" data-action="download-results">Print / Save result slip ${icon('file')}</button></section>
   <div class="stat-grid">
     <article class="stat-card"><span class="stat-label">Cumulative GPA</span><strong>${results.summary?.cgpa ?? '—'}</strong></article>
     <article class="stat-card"><span class="stat-label">Credits earned</span><strong>${results.summary?.totalCredits || 0}</strong></article>
-    <article class="stat-card"><span class="stat-label">Trimesters completed</span><strong>${results.summary?.semestersCompleted || 0}</strong></article>
-    <article class="stat-card"><span class="stat-label">Units / trimester</span><strong>6</strong></article>
+    <article class="stat-card"><span class="stat-label">Units completed</span><strong>${done}</strong><span class="stat-meta">of ${req} required</span></article>
+    <article class="stat-card"><span class="stat-label">Units remaining</span><strong>${left}</strong><span class="stat-meta">${results.summary?.programmeType || 'programme'} target ${req}</span></article>
+    <article class="stat-card"><span class="stat-label">Graduation</span><strong>${eligible ? 'Eligible' : 'In progress'}</strong><span class="stat-meta">min ${gradMin} · target ${req}</span></article>
   </div>
   <p class="panel-note">${escapeHtml(results.note || '')}</p>
-  ${(results.semesters || []).map(sem => `<div class="panel"><div class="panel-header"><h2>${escapeHtml(sem.semester)}</h2><span class="badge">GPA ${sem.gpa} · ${sem.units?.length || 0} units</span></div>
+  ${(results.semesters || []).map(sem => {
+    const units = (sem.units || []).slice(0, 6); // hard cap 6 on slip
+    return `<div class="panel"><div class="panel-header"><h2>${escapeHtml(sem.semester)}</h2><span class="badge">GPA ${sem.gpa} · ${units.length} units</span></div>
   <div class="table-wrap"><table><thead><tr><th>Code</th><th>Unit</th><th>Credits</th><th>Grade</th><th>Points</th></tr></thead>
-  <tbody>${(sem.units || []).map(u => `<tr><td>${escapeHtml(u.code)}</td><td>${escapeHtml(u.title)}</td><td>${u.credits}</td><td><strong>${escapeHtml(u.grade)}</strong></td><td>${u.points}</td></tr>`).join('')}</tbody></table></div></div>`).join('') || '<p class="empty-copy">No completed trimesters yet for result display.</p>'}`;
+  <tbody>${units.map(u => `<tr><td>${escapeHtml(u.code)}</td><td>${escapeHtml(u.title)}</td><td>${u.credits}</td><td><strong>${escapeHtml(u.grade)}</strong></td><td>${u.points}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }).join('') || '<p class="empty-copy">No completed trimesters yet for result display.</p>'}`;
 }
 
 function genericPage(section) {
@@ -432,19 +486,50 @@ function coursesView() {
   const prog = state.selectedProgramme || selected;
   const filter = (state.unitAdminFilter || '').trim().toLowerCase();
 
+  // Build set of curriculum codes for selected programme (shared catalogue uses programme=null)
+  const progCodeSet = new Set();
+  const progRowsByTerm = { 1: [], 2: [], 3: [] };
+  if (prog && curriculum[prog]) {
+    for (const t of ['1', '2', '3']) {
+      for (const row of (curriculum[prog][t] || [])) {
+        const code = String(row[0] || '').trim();
+        if (!code) continue;
+        progCodeSet.add(code.toUpperCase());
+        progRowsByTerm[Number(t)].push(row);
+      }
+    }
+  }
+
   const byProg = courses.filter(c => {
     if (!prog) return true;
-    return (c.programme || '') === prog || (!(c.programme) && filter);
+    if (!progCodeSet.size) return true;
+    return progCodeSet.has(String(c.code || '').toUpperCase());
   });
 
   const trimesterGroups = [1, 2, 3].map(t => {
-    let units = byProg.filter(c => Number(c.trimester) === t || String(c.semester || '').includes(`Trimester ${t}`));
-    // merge curriculum rows not yet in DB for display as "planned"
-    const planned = (curriculum[prog] && curriculum[prog][String(t)]) || [];
-    const codes = new Set(units.map(u => u.code));
+    const planned = progRowsByTerm[t] || [];
+    const plannedCodes = planned.map(r => String(r[0] || '').toUpperCase());
+    // Prefer DB course when code exists; otherwise show planned curriculum row
+    let units = [];
+    const used = new Set();
     for (const row of planned) {
-      if (!codes.has(row[0])) {
-        units.push({ id: null, code: row[0], title: row[1], credits: row[2], lecturer: '—', capacity: 60, enrolled_count: 0, seats_remaining: 60, semester: `Trimester ${t}`, trimester: t, programme: prog, planned: true });
+      const key = String(row[0] || '').toUpperCase();
+      if (!key || used.has(key)) continue;
+      used.add(key);
+      const dbc = courses.find(c => String(c.code || '').toUpperCase() === key);
+      if (dbc) {
+        units.push({ ...dbc, trimester: t, semester: `Trimester ${t}`, programme: prog });
+      } else {
+        units.push({ id: null, code: row[0], title: row[1], credits: row[2] || 3, lecturer: '—', capacity: 60, enrolled_count: 0, seats_remaining: 60, semester: `Trimester ${t}`, trimester: t, programme: prog, planned: true });
+      }
+    }
+    // Also include any DB units tagged for this trimester that match programme codes
+    for (const c of byProg) {
+      const key = String(c.code || '').toUpperCase();
+      if (used.has(key)) continue;
+      if (Number(c.trimester) === t || String(c.semester || '').includes(`Trimester ${t}`)) {
+        used.add(key);
+        units.push({ ...c, trimester: t, semester: c.semester || `Trimester ${t}`, programme: prog });
       }
     }
     if (filter) units = units.filter(c => `${c.code} ${c.title} ${c.lecturer}`.toLowerCase().includes(filter));
@@ -454,7 +539,7 @@ function coursesView() {
 
   const editing = state.editingCourseId;
   const editCourse = editing ? courses.find(c => c.id === editing) : null;
-  const totalUnits = byProg.length;
+  const totalUnits = progCodeSet.size || byProg.length;
 
   return `<section class="page-header"><div><span class="eyebrow">Administration</span><h1>Unit management</h1><p>Select a programme (course), then manage its units by Trimester 1, 2 and 3.</p></div></section>
 
@@ -517,16 +602,61 @@ function registrationsView() {
   const registrations = state.data?.registrations || [];
   const students = state.data?.students || [];
   const courses = state.data?.courses || [];
-  return `<section class="page-header"><div><span class="eyebrow">Registrations</span><h1>Manage enrolments</h1></div></section>
-  <div class="panel"><div class="panel-header"><h2>Register student on course</h2></div>
-  <form id="assignment-form" class="form-grid">
-    <label class="field"><span>Student</span><select name="student_id" required><option value="">Select…</option>${students.map(s => `<option value="${s.id}">${escapeHtml(s.student_number)} — ${escapeHtml(s.full_name)}</option>`).join('')}</select></label>
-    <label class="field"><span>Course</span><select name="course_id" required><option value="">Select…</option>${courses.map(c => `<option value="${c.id}">${escapeHtml(c.code)} — ${escapeHtml(c.title)}</option>`).join('')}</select></label>
-    <button type="submit" class="primary-button">Register</button>
-  </form></div>
-  <div class="panel"><div class="panel-header"><h2>Active registrations</h2></div>
+  const selectedStudentId = state.adminSelectedStudent || '';
+  const adminFilter = (state.adminUnitFilter || '').trim().toLowerCase();
+  let selectable = courses.filter(c => c.id && (c.seats_remaining == null || c.seats_remaining > 0));
+  if (adminFilter) {
+    selectable = selectable.filter(c => `${c.code} ${c.title} ${c.lecturer || ''}`.toLowerCase().includes(adminFilter));
+  }
+  // Exclude units student already registered
+  const already = new Set(
+    registrations.filter(r => r.student_id === selectedStudentId).map(r => r.course_id)
+  );
+  selectable = selectable.filter(c => !already.has(c.id));
+  const basket = state.adminSelectedUnits || new Set();
+
+  return `<section class="page-header"><div><span class="eyebrow">Registrations</span><h1>Manage enrolments</h1><p>Select a student, tick units, then register them in bulk.</p></div></section>
+
+  <div class="panel"><div class="panel-header"><h2>Register units for a student</h2></div>
+  <div class="form-grid">
+    <label class="field"><span>Student</span>
+      <select data-admin-student>
+        <option value="">Select student…</option>
+        ${students.map(s => `<option value="${s.id}" ${s.id === selectedStudentId ? 'selected' : ''}>${escapeHtml(s.student_number)} — ${escapeHtml(s.full_name)} (${escapeHtml(s.programme || '')})</option>`).join('')}
+      </select>
+    </label>
+    <label class="field"><span>Search units</span>
+      <input type="search" data-admin-unit-filter placeholder="Code or title…" value="${escapeHtml(state.adminUnitFilter || '')}" ${selectedStudentId ? '' : 'disabled'} />
+    </label>
+  </div>
+  ${selectedStudentId ? `
+  <p class="panel-note">Tick units below, then click <strong>Register selected units</strong>. Already registered units are hidden.</p>
+  <div class="table-wrap" style="max-height:320px;overflow:auto">
+    <table>
+      <thead><tr><th></th><th>Code</th><th>Unit title</th><th>Credits</th><th>Seats</th></tr></thead>
+      <tbody>
+        ${selectable.length ? selectable.slice(0, 200).map(c => {
+          const checked = basket.has(c.id);
+          return `<tr class="${checked ? 'row-selected' : ''}">
+            <td><input type="checkbox" data-admin-toggle-unit="${c.id}" ${checked ? 'checked' : ''} /></td>
+            <td><strong>${escapeHtml(c.code)}</strong></td>
+            <td>${escapeHtml(c.title)}</td>
+            <td>${c.credits || 3}</td>
+            <td>${c.seats_remaining ?? '—'}</td>
+          </tr>`;
+        }).join('') : '<tr><td colspan="5" class="empty-copy">No selectable units (all registered or none match search).</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+  <div class="selection-actions" style="margin-top:12px">
+    <button type="button" class="secondary-button" data-action="admin-clear-basket" ${basket.size ? '' : 'disabled'}>Clear selection</button>
+    <button type="button" class="primary-button" data-action="admin-register-basket" ${basket.size ? '' : 'disabled'}>Register selected units (${basket.size})</button>
+  </div>` : '<p class="empty-copy">Select a student to choose units.</p>'}
+  </div>
+
+  <div class="panel"><div class="panel-header"><h2>Active registrations (${registrations.length})</h2></div>
   <div class="table-wrap"><table><thead><tr><th>Student</th><th>Reg. No</th><th>Course</th><th>Registered</th><th></th></tr></thead>
-  <tbody>${registrations.map(r => `<tr><td>${escapeHtml(r.student_name)}</td><td>${escapeHtml(r.student_number)}</td><td>${escapeHtml(r.code)} — ${escapeHtml(r.title)}</td><td>${formatDate(r.registered_at)}</td><td><button class="text-button" data-admin-withdraw="${r.id}">Withdraw</button></td></tr>`).join('')}</tbody></table></div></div>`;
+  <tbody>${registrations.length ? registrations.map(r => `<tr><td>${escapeHtml(r.student_name)}</td><td>${escapeHtml(r.student_number)}</td><td>${escapeHtml(r.code)} — ${escapeHtml(r.title)}</td><td>${formatDate(r.registered_at)}</td><td><button class="text-button" data-admin-withdraw="${r.id}">Withdraw</button></td></tr>`).join('') : '<tr><td colspan="5" class="empty-copy">No active registrations.</td></tr>'}</tbody></table></div></div>`;
 }
 
 function renderView() {
@@ -570,13 +700,22 @@ function bindInteractions() {
   document.querySelectorAll('[data-register]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; try { state.data = await apiRequest('/api/registrations', { method: 'POST', body: JSON.stringify({ course_id: button.dataset.register }) }); render(); showToast('Course registered successfully.', 'success'); } catch (error) { button.disabled = false; showToast(error.message, 'error'); } }));
   document.querySelectorAll('[data-withdraw]').forEach(button => button.addEventListener('click', async () => { if (!confirm('Withdraw from this course? Your registration history will be preserved.')) return; try { state.data = await apiRequest(`/api/registrations/${button.dataset.withdraw}`, { method: 'DELETE' }); render(); showToast('Course withdrawn from your active registration.', 'success'); } catch (error) { showToast(error.message, 'error'); } }));
 
-  document.querySelectorAll('[data-toggle-unit]').forEach(el => el.addEventListener('click', event => {
-    const id = el.dataset.toggleUnit;
-    if (!id) return;
-    if (state.selectedUnits.has(id)) state.selectedUnits.delete(id);
-    else state.selectedUnits.add(id);
-    render();
-  }));
+  document.querySelectorAll('[data-toggle-unit]').forEach(el => {
+    const handler = event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const id = el.dataset.toggleUnit;
+      if (!id) return;
+      if (state.selectedUnits.has(id)) state.selectedUnits.delete(id);
+      else state.selectedUnits.add(id);
+      render();
+    };
+    el.addEventListener('change', handler);
+    el.addEventListener('click', event => {
+      // For buttons (Remove) use click; for checkboxes change already fires
+      if (el.tagName === 'BUTTON') handler(event);
+    });
+  });
   document.querySelector('[data-unit-filter]')?.addEventListener('input', event => {
     state.unitFilter = event.target.value || '';
     // debounce-ish: re-render on change
@@ -673,6 +812,53 @@ function bindInteractions() {
     }
   }));
   document.querySelector('#assignment-form')?.addEventListener('submit', event => { event.preventDefault(); submitForm(event.currentTarget, '/api/admin/registrations'); });
+
+  // Admin: select student for bulk unit registration
+  document.querySelector('[data-admin-student]')?.addEventListener('change', event => {
+    state.adminSelectedStudent = event.target.value || '';
+    state.adminSelectedUnits = new Set();
+    render();
+  });
+  document.querySelector('[data-admin-unit-filter]')?.addEventListener('input', event => {
+    state.adminUnitFilter = event.target.value || '';
+    clearTimeout(window.__adminUnitFilterTimer);
+    window.__adminUnitFilterTimer = setTimeout(() => render(), 200);
+  });
+  document.querySelectorAll('[data-admin-toggle-unit]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.dataset.adminToggleUnit;
+      if (!id) return;
+      if (!state.adminSelectedUnits) state.adminSelectedUnits = new Set();
+      if (state.adminSelectedUnits.has(id)) state.adminSelectedUnits.delete(id);
+      else state.adminSelectedUnits.add(id);
+      render();
+    });
+  });
+  document.querySelector('[data-action="admin-clear-basket"]')?.addEventListener('click', () => {
+    state.adminSelectedUnits = new Set();
+    render();
+  });
+  document.querySelector('[data-action="admin-register-basket"]')?.addEventListener('click', async () => {
+    const student_id = state.adminSelectedStudent;
+    const ids = [...(state.adminSelectedUnits || [])];
+    if (!student_id || !ids.length) return;
+    const button = document.querySelector('[data-action="admin-register-basket"]');
+    if (button) button.disabled = true;
+    let ok = 0, fail = 0;
+    for (const course_id of ids) {
+      try {
+        state.data = { ...state.data, ...(await apiRequest('/api/admin/registrations', { method: 'POST', body: JSON.stringify({ student_id, course_id }) })) };
+        state.adminSelectedUnits.delete(course_id);
+        ok += 1;
+      } catch (error) {
+        fail += 1;
+      }
+    }
+    render();
+    if (ok) showToast(`${ok} unit(s) registered for student.`, 'success');
+    if (fail) showToast(`${fail} unit(s) could not be registered.`, 'error');
+  });
+
   document.querySelector('#admin-password-form')?.addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -719,13 +905,21 @@ function bindInteractions() {
 
   document.querySelector('#fee-pay-form')?.addEventListener('submit', async event => {
     event.preventDefault();
-    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    // empty amount → full remaining (server treats missing/0 as full)
+    if (payload.amount === '' || payload.amount === undefined) delete payload.amount;
+    else payload.amount = Number(payload.amount);
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
     try {
-      state.data = await apiRequest('/api/fees/pay', { method: 'POST', body: JSON.stringify(payload) });
+      const res = await apiRequest('/api/fees/pay', { method: 'POST', body: JSON.stringify(payload) });
+      state.data = res;
       render();
-      showToast('Payment recorded successfully.', 'success');
+      showToast(res.message || 'Payment recorded successfully.', 'success');
     } catch (error) {
       showToast(error.message, 'error');
+      if (button) button.disabled = false;
     }
   });
   document.querySelector('#admin-fee-clear-form')?.addEventListener('submit', async event => {
@@ -742,31 +936,36 @@ function bindInteractions() {
       showToast(error.message, 'error');
     }
   });
+  const openPrintDocument = (title, bodyHtml, filename) => {
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) { showToast('Please allow pop-ups to print this document.', 'error'); return; }
+    const logo = `${window.location.origin}/manus-storage/KeMU-Corporate-Logo-Full-1_f6fcbf97.png`;
+    const address = `<header class="institution"><img src="${logo}" alt="KeMU logo"><div><h1>KENYA METHODIST UNIVERSITY</h1><p>P. O. BOX 267 - 60200 Meru - Kenya,</p><p>Tel: 254-061-313097, 254-064-3131279, 0724256162</p><p>Email: info@kemu.ac.ke, Website: www.kemu.ac.ke</p></div></header>`;
+    printWindow.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>
+      *{box-sizing:border-box}body{font:12px Arial,sans-serif;color:#222;margin:24px}h1,h2,h3,p{margin-top:0}.institution{display:flex;align-items:center;gap:18px;border-bottom:2px solid #87124d;padding:0 0 14px;margin-bottom:20px}.institution img{width:100px;height:auto;object-fit:contain}.institution h1{font-size:17px;color:#87124d;margin:0 0 6px}.institution p{font-size:10px;margin:3px 0}.document-title{text-align:center;margin:16px 0}.student-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.summary{display:flex;flex-wrap:wrap;gap:18px;margin:12px 0;padding:12px;background:#f7f3f0}.table-wrap{overflow:visible!important;margin:12px 0}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #bbb;padding:7px;text-align:left;vertical-align:top}th{background:#f1e8ed}.panel,.stat-grid,.page-header{margin:12px 0}.panel-header{display:flex;justify-content:space-between;align-items:center;gap:8px}button,form,[data-action]{display:none!important}.badge{border:1px solid #aaa;padding:2px 5px;border-radius:4px}.footnote{margin-top:28px;font-size:10px;color:#555}@page{size:A4;margin:14mm}@media(max-width:600px){body{margin:10px}.institution{align-items:flex-start;gap:10px}.institution img{width:70px}.institution h1{font-size:14px}.institution p{font-size:9px}.student-meta{grid-template-columns:1fr}table{font-size:9px}th,td{padding:4px}}@media print{body{margin:0}.table-wrap{overflow:visible!important}}
+      </style></head><body>${address}<h2 class="document-title">${title}</h2>${bodyHtml}<p class="footnote">Generated from the KeMU Student Portal. Please contact the Registry for official verification.</p><script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=r;i.onerror=r}))).then(()=>setTimeout(()=>window.print(),250));});</script></body></html>`);
+    printWindow.document.close();
+  };
+
   document.querySelector('[data-action="download-results"]')?.addEventListener('click', () => {
     const results = state.data?.results;
     const student = state.data?.student;
     if (!results || !student) return;
-    let text = `KeMU Student Portal — Provisional Results\\n`;
-    text += `${student.full_name} | ${student.student_number}\\n`;
-    text += `Programme: ${student.programme}\\n`;
-    text += `CGPA: ${results.summary?.cgpa ?? '—'} | Credits: ${results.summary?.totalCredits || 0}\\n`;
-    text += `Generated: ${new Date().toLocaleString()}\\n`;
-    text += `${results.note || ''}\\n\\n`;
-    for (const sem of results.semesters || []) {
-      text += `=== ${sem.semester} (GPA ${sem.gpa}) — ${sem.units?.length || 0} units ===\\n`;
-      for (const u of sem.units || []) {
-        text += `  ${u.code}  ${u.title}  ${u.credits}cr  Grade ${u.grade}  (${u.points})\\n`;
-      }
-      text += `\\n`;
-    }
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `KeMU-Results-${(student.student_number || 'student').replace(/[\\\\/]/g, '-')}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Results downloaded.', 'success');
+    const semesters = (results.semesters || []).map(sem => {
+      const units = (sem.units || []).slice(0, 6);
+      return `<section class="panel"><div class="panel-header"><h3>${escapeHtml(sem.semester)}</h3><strong>GPA ${escapeHtml(sem.gpa)} · ${units.length} units</strong></div><div class="table-wrap"><table><thead><tr><th>Code</th><th>Unit</th><th>Credits</th><th>Grade</th><th>Points</th></tr></thead><tbody>${units.map(u => `<tr><td>${escapeHtml(u.code)}</td><td>${escapeHtml(u.title)}</td><td>${escapeHtml(u.credits)}</td><td>${escapeHtml(u.grade)}</td><td>${escapeHtml(u.points)}</td></tr>`).join('')}</tbody></table></div></section>`;
+    }).join('') || '<p>No completed trimesters recorded.</p>';
+    const body = `<div class="student-meta"><div><b>Student name:</b> ${escapeHtml(student.full_name || '')}</div><div><b>Registration number:</b> ${escapeHtml(student.student_number || '')}</div><div><b>Programme:</b> ${escapeHtml(student.programme || '')}</div><div><b>Date generated:</b> ${new Date().toLocaleDateString()}</div></div><div class="summary"><span><b>CGPA:</b> ${escapeHtml(results.summary?.cgpa ?? '—')}</span><span><b>Credits earned:</b> ${escapeHtml(results.summary?.totalCredits || 0)}</span><span><b>Units completed:</b> ${escapeHtml(results.summary?.totalUnits || 0)}</span></div>${semesters}<p>${escapeHtml(results.note || '')}</p>`;
+    openPrintDocument('PROVISIONAL RESULT SLIP', body, `KeMU-Results-${student.student_number || 'student'}`);
+  });
+
+  document.querySelector('[data-action="print-fees"]')?.addEventListener('click', () => {
+    const student = state.data?.student || {};
+    const source = document.querySelector('main') || document.querySelector('.portal-main') || document.querySelector('#app');
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('form,button,[data-action],.mobile-overlay,.sidebar,.topbar').forEach(el => el.remove());
+    const body = `<div class="student-meta"><div><b>Student name:</b> ${escapeHtml(student.full_name || '')}</div><div><b>Registration number:</b> ${escapeHtml(student.student_number || '')}</div><div><b>Programme:</b> ${escapeHtml(student.programme || '')}</div><div><b>Date generated:</b> ${new Date().toLocaleDateString()}</div></div>${clone.innerHTML}`;
+    openPrintDocument('FEE STATEMENT', body, `KeMU-Fees-${student.student_number || 'student'}`);
   });
 
   document.querySelector('#local-login-form')?.addEventListener('submit', async event => {
